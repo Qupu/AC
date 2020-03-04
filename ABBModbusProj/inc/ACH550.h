@@ -12,19 +12,23 @@ class ACH550 {
 public:
 	ACH550();
 	virtual ~ACH550();
-	void accelerate();
-	void decelerate();
+
 	void stop();
 	void begin();
 
+	void updateSpeed();
+
 	int getCurrSpeed();
-	int getTargetSpeed();
 	bool getState();
+	void setTargetSpeed(int sp);
+	void accelerate();
+	void decelerate();
 
 private:
 	int CURRspeed;				//current running speed of the drive
 	int TARGETspeed;			//desired speed
 	bool state;					//true on , false off
+
 	ModbusMaster mm;
 	ModbusRegister mr;
 };
