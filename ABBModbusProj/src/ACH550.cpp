@@ -7,8 +7,7 @@
 
 #include "ACH550.h"
 
-ACH550::ACH550() {
-	// TODO Auto-generated constructor stub
+ACH550::ACH550(ModbusMaster mast) : mm(mast) {
 
 }
 
@@ -47,10 +46,6 @@ void ACH550::updateSpeed(){
 
 int ACH550::getCurrSpeed(){
 	int sp;
-
-	// ModbusMaster mm
-
-
 
 	return sp;
 }

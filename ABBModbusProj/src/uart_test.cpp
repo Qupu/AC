@@ -341,7 +341,7 @@ int main(void)
 	Board_LED_Set(0, false);
 	Board_LED_Set(1, true);
 	printf("Started\n"); // goes to ITM console if retarget_itm.c is included
-	dbgu.write("Hello, world\n");
+	dbgu.write("\rHello, world\n");
 
 	abbModbusTest();
 

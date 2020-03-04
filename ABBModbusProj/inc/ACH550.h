@@ -4,13 +4,15 @@
  *  Created on: 28.2.2020
  *      Author: Santeri Rauhala
  */
+#include "ModbusMaster.h"
+#include "ModbusRegister.h"
 
 #ifndef ACH550_H_
 #define ACH550_H_
 
 class ACH550 {
 public:
-	ACH550();
+	ACH550(ModbusMaster mast);
 	virtual ~ACH550();
 
 	void stop();
@@ -30,7 +32,7 @@ private:
 	bool state;					//true on , false off
 
 	ModbusMaster mm;
-	ModbusRegister mr;
+	//ModbusRegister mr;
 };
 
 #endif /* ACH550_H_ */
