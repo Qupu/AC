@@ -18,6 +18,8 @@
 
 #include <cr_section_macros.h>
 
+#include "DigitalIoPin.h"
+
 // TODO: insert other include files here
 
 // TODO: insert other definitions and declarations here
@@ -211,11 +213,45 @@ bool setFrequency(ModbusMaster& node, uint16_t freq)
 		ctr++;
 	} while(ctr < 20 && !atSetpoint);
 
+	if(ctr>=20) printf("\rtimed out\n");
 	printf("Elapsed: %d\n", ctr * delay); // for debugging
 
 	return atSetpoint;
 }
 
+void startter(ModbusMaster& node)
+{
+	node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
+
+	ModbusRegister ControlWord(&node, 0);
+	ModbusRegister StatusWord(&node, 3);
+	ModbusRegister OutputFrequency(&node, 102);
+	ModbusRegister Current(&node, 103);
+
+
+	// need to use explicit conversion since printf's variable argument doesn't automatically convert this to an integer
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	ControlWord = 0x0406; // prepare for starting
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	Sleep(1000); // give converter some time to set up
+	// note: we should have a startup state machine that check converter status and acts per current status
+	//       but we take the easy way out and just wait a while and hope that everything goes well
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	ControlWord = 0x047F; // set drive to start mode
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	Sleep(1000); // give converter some time to set up
+	// note: we should have a startup state machine that check converter status and acts per current status
+	//       but we take the easy way out and just wait a while and hope that everything goes well
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+}
 
 void abbModbusTest()
 {
@@ -338,10 +374,60 @@ int main(void)
 	/* Enable and setup SysTick Timer at a periodic rate */
 	SysTick_Config(SystemCoreClock / 1000);
 
+	DigitalIoPin sw1(0,17,true,true,true);
+	DigitalIoPin sw2(1,11,true,true,true);
+
+	ModbusMaster node(2); // Create modbus object that connects to slave id 2
+	startter(node);
+
 	Board_LED_Set(0, false);
 	Board_LED_Set(1, true);
-	printf("Started\n"); // goes to ITM console if retarget_itm.c is included
-	dbgu.write("\rHello, world\n");
+
+	int freq = 0;
+
+	bool autom = false; //true==automatic mode on, false=manual mode
+
+	while(1)
+	{
+
+		if(!autom) {
+			if(sw1.read()) {
+				printf("/rpressed sw1\n");
+				freq += 2000;
+
+				while(sw1.read());
+			}
+			if(sw2.read()) {
+				autom = true;
+
+				while(sw2.read());
+			}
+		}
+		else {
+
+			//press = read pressure
+
+			freq = 1000; //press * some rate;
+
+			if(sw2.read()) {
+				autom = false;
+
+				while(sw2.read());
+			}
+		}
+
+		/*
+		if(sw2.read())
+		{
+			printf("/rpressed s2\n");
+			freq -= 2000;
+
+			while(sw2.read());
+		}
+		 */
+
+		setFrequency(node,freq);
+	}
 
 	abbModbusTest();
 
