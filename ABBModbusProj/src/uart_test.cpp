@@ -19,6 +19,7 @@
 #include <cr_section_macros.h>
 
 #include "DigitalIoPin.h"
+#include "SDPSensor.h"
 
 // TODO: insert other include files here
 
@@ -377,6 +378,9 @@ int main(void)
 	DigitalIoPin sw1(0,17,true,true,true);
 	DigitalIoPin sw2(1,11,true,true,true);
 
+	DigitalIoPin swe1(0,10,true,true,true);
+
+	SDPSensor sdp(0x40);
 	ModbusMaster node(2); // Create modbus object that connects to slave id 2
 	startter(node);
 
@@ -387,46 +391,66 @@ int main(void)
 
 	bool autom = false; //true==automatic mode on, false=manual mode
 
+	double press;
+	int setPressDiff = 10;
+
 	while(1)
 	{
 
 		if(!autom) {
 			if(sw1.read()) {
-				printf("/rpressed sw1\n");
+				printf("\rpressed sw1\n");
 				freq += 2000;
 
 				while(sw1.read());
 			}
-			if(sw2.read()) {
-				autom = true;
+			if(sw2.read())
+			{
+				printf("/rpressed s2\n");
+				freq -= 2000;
 
 				while(sw2.read());
+			}
+
+
+			if(swe1.read()) {
+				autom = true;
+				printf("\rautomode on\n");
+				while(swe1.read());
 			}
 		}
 		else {
 
-			//press = read pressure
+			if(press < setPressDiff-1) freq += 40;
+			else if (press > setPressDiff+1) freq -= 40;
 
-			freq = 1000; //press * some rate;
+			if(sw1.read()) {
+				printf("\rpressed sw1\n");
+				setPressDiff += 1;
 
-			if(sw2.read()) {
-				autom = false;
+				while(sw1.read());
+			}
+			if(sw2.read())
+			{
+				printf("/rpressed s2\n");
+				setPressDiff -= 1;
 
 				while(sw2.read());
 			}
+
+			if(swe1.read()) {
+				autom = false;
+				printf("\rautomode off\n");
+				while(swe1.read());
+			}
+			printf("\rpressdiff %d\n",setPressDiff);
 		}
 
-		/*
-		if(sw2.read())
-		{
-			printf("/rpressed s2\n");
-			freq -= 2000;
-
-			while(sw2.read());
-		}
-		 */
-
+		sdp.ReadPressure(press);
 		setFrequency(node,freq);
+
+		printf("\r%.2f",press);
+		printf("\r%d\n",freq);
 	}
 
 	abbModbusTest();
