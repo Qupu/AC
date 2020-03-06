@@ -18,6 +18,9 @@
 
 #include <cr_section_macros.h>
 
+#include "DigitalIoPin.h"
+#include "SDPSensor.h"
+
 // TODO: insert other include files here
 
 // TODO: insert other definitions and declarations here
@@ -343,7 +346,10 @@ void modbusTest()
 	}
 }
 
-
+// Is used to detect the current operation mode for te fan:
+// OperationMode::AUTOMATIC   - the fan system is in automatic mode
+// OperationMode::MANUAL      - the fan system is in manual mode
+enum class OperationMode {AUTOMATIC, MANUAL};
 
 /**
  * @brief	Main UART program body
@@ -389,61 +395,67 @@ int main(void)
 
 	int freq = 0;
 
-	bool autom = false; //true==automatic mode on, false=manual mode
+	OperationMode mode = OperationMode::MANUAL;
 
 	double press;
 	int setPressDiff = 10;
 
 	while(1)
 	{
+		switch (mode) {
+			case (OperationMode::AUTOMATIC):
+				if(press < setPressDiff-1) freq += 40;
+				else if (press > setPressDiff+1) freq -= 40;
 
-		if(!autom) {
-			if(sw1.read()) {
-				printf("\rpressed sw1\n");
-				freq += 2000;
+				if(sw1.read()) {
+					printf("\rpressed sw1\n");
+					setPressDiff += 1;
 
-				while(sw1.read());
-			}
-			if(sw2.read())
-			{
-				printf("/rpressed s2\n");
-				freq -= 2000;
+					while(sw1.read());
+				}
 
-				while(sw2.read());
-			}
+				if(sw2.read())
+				{
+					printf("\rpressed s2\n");
 
+					setPressDiff -= 1;
 
-			if(swe1.read()) {
-				autom = true;
-				printf("\rautomode on\n");
-				while(swe1.read());
-			}
-		}
-		else {
+					while(sw2.read());
+				}
 
-			if(press < setPressDiff-1) freq += 40;
-			else if (press > setPressDiff+1) freq -= 40;
+				if(swe1.read()) {
+					autom = false;
+					printf("\rautomode off\n");
+					while(swe1.read());
+				}
 
-			if(sw1.read()) {
-				printf("\rpressed sw1\n");
-				setPressDiff += 1;
+				printf("\rpressdiff %d\n",setPressDiff);
 
-				while(sw1.read());
-			}
-			if(sw2.read())
-			{
-				printf("\rpressed s2\n");
-				setPressDiff -= 1;
+			break;
 
-				while(sw2.read());
-			}
+			case (OperationMode::MANUAL):
+				if(sw1.read()) {
+					printf("\rpressed sw1\n");
+					freq += 2000;
 
-			if(swe1.read()) {
-				autom = false;
-				printf("\rautomode off\n");
-				while(swe1.read());
-			}
-			printf("\rpressdiff %d\n",setPressDiff);
+					while(sw1.read());
+				}
+
+				if(sw2.read())
+				{
+					printf("/rpressed s2\n");
+					freq -= 2000;
+
+					while(sw2.read());
+				}
+
+				if(swe1.read()) {
+					autom = true;
+					printf("\rautomode on\n");
+					while(swe1.read());
+				}
+
+				break;
 		}
 
 		sdp.ReadPressure(press);
