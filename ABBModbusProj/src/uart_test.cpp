@@ -28,6 +28,9 @@
 #include "ModbusMaster.h"
 #include "ModbusRegister.h"
 #include "LpcUart.h"
+#include "DigitalIoPin.h"
+#include "SDPSensor.h"
+#include "Switch.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -211,11 +214,45 @@ bool setFrequency(ModbusMaster& node, uint16_t freq)
 		ctr++;
 	} while(ctr < 20 && !atSetpoint);
 
+	if(ctr>=20) printf("\rtimed out\n");
 	printf("Elapsed: %d\n", ctr * delay); // for debugging
 
 	return atSetpoint;
 }
 
+void startter(ModbusMaster& node)
+{
+	node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
+
+	ModbusRegister ControlWord(&node, 0);
+	ModbusRegister StatusWord(&node, 3);
+	ModbusRegister OutputFrequency(&node, 102);
+	ModbusRegister Current(&node, 103);
+
+
+	// need to use explicit conversion since printf's variable argument doesn't automatically convert this to an integer
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	ControlWord = 0x0406; // prepare for starting
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	Sleep(1000); // give converter some time to set up
+	// note: we should have a startup state machine that check converter status and acts per current status
+	//       but we take the easy way out and just wait a while and hope that everything goes well
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	ControlWord = 0x047F; // set drive to start mode
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	Sleep(1000); // give converter some time to set up
+	// note: we should have a startup state machine that check converter status and acts per current status
+	//       but we take the easy way out and just wait a while and hope that everything goes well
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+}
 
 void abbModbusTest()
 {
@@ -338,13 +375,85 @@ int main(void)
 	/* Enable and setup SysTick Timer at a periodic rate */
 	SysTick_Config(SystemCoreClock / 1000);
 
+	Switch sw1(0,17,true,true,true);
+	Switch sw2(1,11,true,true,true);
+
+	Switch swe1(0,10,true,true,true);
+
+	SDPSensor sdp(0x40);
+	ModbusMaster node(2); // Create modbus object that connects to slave id 2
+	startter(node);
+
 	Board_LED_Set(0, false);
 	Board_LED_Set(1, true);
-	printf("Started\n"); // goes to ITM console if retarget_itm.c is included
-	dbgu.write("\rHello, world\n");
+
+	int freq = 0;
+
+	bool autom = false; //true==automatic mode on, false=manual mode
+
+	double press;
+	int setPressDiff = 10;
+
+	while(1)
+	{
+
+		if(!autom) {
+			if(sw1.read()) {
+				printf("\rpressed sw1\n");
+				freq += 2000;
+
+				while(sw1.read());
+			}
+			if(sw2.read())
+			{
+				printf("/rpressed s2\n");
+				freq -= 2000;
+
+				while(sw2.read());
+			}
+
+
+			if(swe1.read()) {
+				autom = true;
+				printf("\rautomode on\n");
+				while(swe1.read());
+			}
+		}
+		else {
+
+			if(press < setPressDiff-1) freq += 40;
+			else if (press > setPressDiff+1) freq -= 40;
+
+			if(sw1.read()) {
+				printf("\rpressed sw1\n");
+				setPressDiff += 1;
+
+				while(sw1.read());
+			}
+			if(sw2.read())
+			{
+				printf("\rpressed s2\n");
+				setPressDiff -= 1;
+
+				while(sw2.read());
+			}
+
+			if(swe1.read()) {
+				autom = false;
+				printf("\rautomode off\n");
+				while(swe1.read());
+			}
+			printf("\rpressdiff %d\n",setPressDiff);
+		}
+
+		sdp.ReadPressure(press);
+		setFrequency(node,freq);
+
+		printf("\r%.2f",press);
+		printf("\r%d\n",freq);
+	}
 
 	abbModbusTest();
 
 	return 1;
 }
-
