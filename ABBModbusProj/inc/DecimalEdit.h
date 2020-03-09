@@ -16,7 +16,7 @@ public:
 	void cancel();
 	void setFocus(bool focus);
 	bool getFocus();
-	void display();
+	virtual void display();
 	float getValue();
 	void setValue(float value);
 	void setStep(float _step);

@@ -1,16 +1,10 @@
-/*
- * IntegerEdit.cpp
- *
- *  Created on: 2.2.2016
- *      Author: krl
- */
-
 #include "IntegerEdit.h"
 #include <cstdio>
 
-IntegerEdit::IntegerEdit(LiquidCrystal *lcd_, std::string editTitle, int _lowerLim, int _upperLim): lcd(lcd_), title(editTitle) {
+IntegerEdit::IntegerEdit(LiquidCrystal *lcd_, std::string editTitle, int _step, int _lowerLim, int _upperLim): lcd(lcd_), title(editTitle) {
 	value = 0;
 	edit = 0;
+	step = _step;
 	lowerLim = _lowerLim;
 	upperLim = _upperLim;
 	focus = false;
@@ -20,13 +14,15 @@ IntegerEdit::~IntegerEdit() {
 }
 
 void IntegerEdit::increment() {
-	if (edit < upperLim)
-		edit++;
+	edit += step;
+	if (edit < lowerLim || edit > upperLim)
+		edit -= step;
 }
 
 void IntegerEdit::decrement() {
-	if (edit > lowerLim)
-		edit--;
+	edit -= step;
+	if (edit < lowerLim || edit > upperLim)
+		edit += step;
 }
 
 bool IntegerEdit::accept() {
@@ -86,4 +82,8 @@ void IntegerEdit::setValue(int value) {
 
 	edit = value;
 	save();
+}
+
+void IntegerEdit::setStep(int _step) {
+	step = _step;
 }

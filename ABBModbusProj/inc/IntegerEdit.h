@@ -1,10 +1,3 @@
-/*
- * IntegerEdit.h
- *
- *  Created on: 2.2.2016
- *      Author: krl
- */
-
 #ifndef INTEGEREDIT_H_
 #define INTEGEREDIT_H_
 
@@ -14,7 +7,7 @@
 
 class IntegerEdit: public PropertyEdit {
 public:
-	IntegerEdit(LiquidCrystal *lcd_, std::string editTitle, int _lowerLim, int _upperLim);
+	IntegerEdit(LiquidCrystal *lcd_, std::string editTitle, int _step, int _lowerLim, int _upperLim);
 	virtual ~IntegerEdit();
 	void increment();
 	void decrement();
@@ -25,6 +18,7 @@ public:
 	void display();
 	int getValue();
 	void setValue(int value);
+	void setStep(int _step);
 private:
 	bool save();
 	void displayEditValue();
@@ -32,6 +26,7 @@ private:
 	std::string title;
 	int value;
 	int edit;
+	int step;
 	int lowerLim;
 	int upperLim;
 	bool focus;

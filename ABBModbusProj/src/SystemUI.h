@@ -32,12 +32,15 @@ public:
 	int getFrequency();
 
 private:
-	BarGraph *barGraph;
 	LiquidCrystal *lcd;
 
 	SimpleMenu autoModeMenu;
 	SimpleMenu manualModeMenu;
 	SimpleMenu *currMenu;
+
+	DecimalEdit *pressureItem;
+	IntegerEdit *frequencyItem;
+
 	void switchMode();
 
 	OperationMode mode;

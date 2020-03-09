@@ -29,12 +29,27 @@ void SystemUI::switchMode() {
 // The public interface:
 
 SystemUI::SystemUI() {
-	// TODO Auto-generated constructor stub
+	//Set up the LCD display:
+	DigitalIOPin RS(0, 8, false, false, false);
+	DigitalIOPin EN(1, 6, false, false, false);
+	DigitalIOPin D0(1, 8, false, false, false);
+	DigitalIOPin D1(0, 5, false, false, false);
+	DigitalIOPin D2(0, 6, false, false, false);
+	DigitalIOPin D3(0, 7, false, false, false);
 
+	lcd = new LiquidCrystal(&RS, &EN, &D0, &D1, &D2, &D3);
+	lcd->begin(16,2);
+	lcd->setCursor(0,0);
+
+	// Set up the manual and automatic mode menus:
+	pressureItem = new PressureItem(lcd, "Pressure", 0, 100);
+	autoModeMenu
 }
 
 SystemUI::~SystemUI() {
-	// TODO Auto-generated destructor stub
+	delete pressureItem;
+	delete frequencyItem;
+	delete lcd;
 }
 
 void SystemUI::event(systemUIEvent e) {
@@ -50,6 +65,7 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::SELECT_SW_PRESSED):
+			// Not implemented
 			break;
 	}
 }
