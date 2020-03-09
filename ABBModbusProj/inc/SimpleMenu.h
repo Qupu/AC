@@ -19,6 +19,8 @@ public:
 	void event(MenuItem::menuEvent e);
 	bool hasChanged();
 	void clearChange();
+	void reset();
+
 private:
 	std::vector<MenuItem *> items;
 	int position;

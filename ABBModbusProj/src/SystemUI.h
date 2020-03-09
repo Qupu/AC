@@ -9,6 +9,7 @@
 #define SYSTEMUI_H_
 
 #include "SimpleMenu.h"
+#include "MenuItem.h"
 #include "LiquidCrystal.h"
 #include "BarGraph.h"
 
@@ -16,15 +17,22 @@ enum class OperationMode {AUTOMATIC, MANUAL};
 
 class SystemUI {
 public:
-	SystemMenu();
-	virtual ~SystemMenu();
-	void event(MenuItem::menuEvent e);
+	enum class systemUIEvent {
+			UP_SW_PRESSED,
+			DOWN_SW_PRESSED,
+			SELECT_SW_PRESSED,
+			MODE_SW_PRESSED
+			// More Events?
+		};
+	SystemUI();
+	virtual ~SystemUI();
+	void event(systemUIEvent e);
 	OperationMode getOperationMode();
 	double getPressure();
 	int getFrequency();
 
 private:
-	BarGraph barGraph;
+	BarGraph *barGraph;
 	LiquidCrystal *lcd;
 
 	SimpleMenu autoModeMenu;

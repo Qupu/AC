@@ -9,34 +9,49 @@
 
 // Private Methods:
 void SystemUI::switchMode() {
+	currMenu->reset();
+
 	switch (mode) {
 		case (OperationMode::AUTOMATIC):
 			mode = OperationMode::MANUAL;
-			currMenu = &ManualModeMenu;
+			currMenu = &manualModeMenu;
 			break;
 		case (OperationMode::MANUAL):
 			mode = OperationMode::AUTOMATIC;
-			currMenu = &AutomaticModeMenu;
+			currMenu = &autoModeMenu;
 			break;
 	}
 
-
+	currMenu->event(MenuItem::menuEvent::show);
 }
 
 // ---------------------
 // The public interface:
 
-SystemUI::SystemMenu() {
+SystemUI::SystemUI() {
 	// TODO Auto-generated constructor stub
 
 }
 
-SystemUI::~SystemMenu() {
+SystemUI::~SystemUI() {
 	// TODO Auto-generated destructor stub
 }
 
-void SystemUI::event(MenuItem::menuEvent e) {
+void SystemUI::event(systemUIEvent e) {
+	switch (e) {
+		case (systemUIEvent::MODE_SW_PRESSED):
+			switchMode();
+			break;
 
+		case (systemUIEvent::UP_SW_PRESSED):
+			break;
+
+		case (systemUIEvent::DOWN_SW_PRESSED):
+			break;
+
+		case (systemUIEvent::SELECT_SW_PRESSED):
+			break;
+	}
 }
 
 OperationMode SystemUI::getOperationMode() {

@@ -424,7 +424,7 @@ int main(void)
 				}
 
 				if(swe1.read()) {
-					autom = false;
+					mode = OperationMode::MANUAL;
 					printf("\rautomode off\n");
 					while(swe1.read());
 				}
@@ -450,7 +450,7 @@ int main(void)
 				}
 
 				if(swe1.read()) {
-					autom = true;
+					mode = OperationMode::MANUAL;
 					printf("\rautomode on\n");
 					while(swe1.read());
 				}

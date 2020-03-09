@@ -45,3 +45,7 @@ void SimpleMenu::clearChange() {
 	for (MenuItem* i : items)
 		i->clearChange();
 }
+
+
+void SimpleMenu::reset() {
+}
