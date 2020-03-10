@@ -34,6 +34,7 @@
 #include "DigitalIoPin.h"
 #include "SDPSensor.h"
 #include "Switch.h"
+#include "SystemUI.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -349,7 +350,6 @@ void modbusTest()
 // Is used to detect the current operation mode for te fan:
 // OperationMode::AUTOMATIC   - the fan system is in automatic mode
 // OperationMode::MANUAL      - the fan system is in manual mode
-enum class OperationMode {AUTOMATIC, MANUAL};
 
 /**
  * @brief	Main UART program body
@@ -399,6 +399,43 @@ int main(void)
 
 	double press;
 	int setPressDiff = 10;
+
+	SystemUI UI;
+	char manualMode[30] = "MANUAL";
+	char automaticMode[30] = "AUTOMATIC";
+	while(1) {
+		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
+		printf("\rValue goes down\n");
+		Sleep(1000);
+		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
+		printf("\rValue goes down\n");
+		Sleep(1000);
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
+		printf("\rMode Changes\n");
+		Sleep(1000);
+		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
+		printf("\rValue goes down\n");
+		Sleep(1000);
+		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		Sleep(1000);
+		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
+		printf("\rMode Changes\n");
+		Sleep(1000);
+		UI.event(SystemUI::systemUIEvent::UP_SW_PRESSED);
+		printf("\rValue goes up\n");
+		Sleep(1000);
+		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		Sleep(1000);
+	}
 
 	while(1)
 	{

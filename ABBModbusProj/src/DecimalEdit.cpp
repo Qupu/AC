@@ -7,7 +7,7 @@ DecimalEdit::DecimalEdit(LiquidCrystal *lcd_, std::string editTitle, float _step
 	step = _step;
 	lowerLim = _lowerLim;
 	upperLim = _upperLim;
-	focus = false;
+	focus = true;
 }
 
 DecimalEdit::~DecimalEdit() {
@@ -35,11 +35,10 @@ void DecimalEdit::cancel() {
 
 
 void DecimalEdit::setFocus(bool focus) {
-	this->focus = focus;
 }
 
 bool DecimalEdit::getFocus() {
-	return this->focus;
+	return true;
 }
 
 void DecimalEdit::display() {

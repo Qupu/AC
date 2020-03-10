@@ -19,7 +19,7 @@ public:
 private:
 	const double step    = 0.5;
 	const double lowLim  = 0.0;
-	const double highLim = 0.0;
+	const double highLim = 100.0;
 };
 
 #endif /* PRESSUREEDIT_H_ */

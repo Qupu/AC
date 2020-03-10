@@ -20,15 +20,13 @@ struct InvalidModeException : public std::exception {
 void SystemUI::switchMode() {
 	currMenu->reset();
 
-	switch (mode) {
-		case (OperationMode::AUTOMATIC):
+	if (mode == OperationMode::AUTOMATIC){
 			mode = OperationMode::MANUAL;
 			currMenu = &manualModeMenu;
-			break;
-		case (OperationMode::MANUAL):
-			mode = OperationMode::AUTOMATIC;
-			currMenu = &autoModeMenu;
-			break;
+	}
+	else {
+		mode = OperationMode::AUTOMATIC;
+		currMenu = &autoModeMenu;
 	}
 
 	currMenu->event(MenuItem::menuEvent::show);
@@ -54,10 +52,13 @@ SystemUI::SystemUI() {
 	// Set up the manual and automatic mode menus:
 	pressureEdit = new PressureEdit(lcd);
 	autoModeMenu.addItem(new MenuItem(pressureEdit));
+	pressureEdit->setValue(50.0);
 
 	frequencyEdit = new FrequencyEdit(lcd);
 	manualModeMenu.addItem(new MenuItem(frequencyEdit));
+	frequencyEdit->setValue(50);
 
+	currMenu = &autoModeMenu;
 }
 
 SystemUI::~SystemUI() {
@@ -73,11 +74,13 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
+		currMenu->event(MenuItem::menuEvent::ok);
 			currMenu->event(MenuItem::menuEvent::up);
 			currMenu->event(MenuItem::menuEvent::ok);
 			break;
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
+			currMenu->event(MenuItem::menuEvent::ok);
 			currMenu->event(MenuItem::menuEvent::down);
 			currMenu->event(MenuItem::menuEvent::ok);
 			break;
@@ -103,18 +106,9 @@ OperationMode SystemUI::getOperationMode() {
 }
 
 double SystemUI::getPressure() {
-	if (mode == OperationMode::AUTOMATIC) {
-		return pressureEdit->getValue();
-	}
-	else {
-		printf("Invalid operation mode selected!");
-	}
+	return pressureEdit->getValue();
 }
 
 int SystemUI::getFrequency() {
-	if (mode == OperationMode::AUTOMATIC) {
-		return frequencyEdit->getValue();
-	} else {
-		printf("Invalid operation mode selected!");
-	}
+	frequencyEdit->getValue();
 }

@@ -31,11 +31,7 @@ void FrequencyEdit::display() {
 
 	// TODO: replace the code below with the BarGraph-drawing routine:
 	char s[17];
-	if(focus) {
-		snprintf(s, 17, "     [%.1f]     ", edit);
-	}
-	else {
-		snprintf(s, 17, "      %.1f      ", edit);
-	}
+	snprintf(s, 17, "      %.1f      ", edit);
+
 	lcd->print(s);
 }

@@ -10,7 +10,7 @@
 #include "SystemUI.h"
 
 // TODO: Adjust step, lower limit and upperlimit for the PressureEdit:
-PressureEdit::PressureEdit(LiquidCrystal *lcd_) : DecimalEdit(lcd_, "PRESSURE:", step, lowLim, highLim) {
+PressureEdit::PressureEdit(LiquidCrystal *lcd_) : DecimalEdit(lcd_, "PRESSURE", step, lowLim, highLim) {
 	// TODO Auto-generated constructor stub
 
 }
