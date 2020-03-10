@@ -8,6 +8,13 @@
 #include "SystemUI.h"
 #include "DigitalIoPin.h"
 #include "MenuItem.h"
+#include <exception>
+
+struct InvalidModeException : public std::exception {
+   const char * what () const throw () {
+      return "Invalid operation mode";
+   }
+};
 
 // Private Methods:
 void SystemUI::switchMode() {
@@ -41,6 +48,7 @@ SystemUI::SystemUI() {
 
 	lcd = new LiquidCrystal(&RS, &EN, &D0, &D1, &D2, &D3);
 	lcd->begin(lcdWidth, lcdHeight);
+	lcd->clear();
 	lcd->setCursor(0,0);
 
 	// Set up the manual and automatic mode menus:
@@ -92,4 +100,21 @@ void SystemUI::event(systemUIEvent e) {
 
 OperationMode SystemUI::getOperationMode() {
 	return mode;
+}
+
+double SystemUI::getPressure() {
+	if (mode == OperationMode::AUTOMATIC) {
+		return pressureEdit->getValue();
+	}
+	else {
+		printf("Invalid operation mode selected!");
+	}
+}
+
+int SystemUI::getFrequency() {
+	if (mode == OperationMode::AUTOMATIC) {
+		return frequencyEdit->getValue();
+	} else {
+		printf("Invalid operation mode selected!");
+	}
 }
