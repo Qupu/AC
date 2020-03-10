@@ -8,7 +8,8 @@
 #ifndef FREQUENCYEDIT_H_
 #define FREQUENCYEDIT_H_
 
-#include "PropertyEdit.h"
+#include "IntegerEdit.h"
+#include "LiquidCrystal.h"
 #include "BarGraph.h"
 
 class FrequencyEdit : public IntegerEdit {

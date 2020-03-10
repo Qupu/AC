@@ -11,13 +11,15 @@
 #include "SimpleMenu.h"
 #include "MenuItem.h"
 #include "LiquidCrystal.h"
+#include "PressureEdit.h"
+#include "FrequencyEdit.h"
 
 enum class OperationMode {AUTOMATIC, MANUAL};
 
 class SystemUI {
 public:
-	const int lcdWidth = 16;
-	const int lcdHeight = 2;
+	static const int lcdWidth = 16;
+	static const int lcdHeight = 2;
 
 	enum class systemUIEvent {
 			UP_SW_PRESSED,
@@ -42,8 +44,8 @@ private:
 	SimpleMenu manualModeMenu;
 	SimpleMenu *currMenu;
 
-	DecimalEdit *pressureItem;
-	IntegerEdit *frequencyItem;
+	PressureEdit *pressureEdit;
+	FrequencyEdit *frequencyEdit;
 
 	void switchMode();
 

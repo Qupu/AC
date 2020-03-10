@@ -7,6 +7,8 @@
 
 #include <FrequencyEdit.h>
 #include "SystemUI.h"
+#include "IntegerEdit.h"
+#include "SystemUI.h"
 
 // TODO: Adjust the step for the edit menu
 FrequencyEdit::FrequencyEdit(LiquidCrystal *lcd_) : IntegerEdit(lcd_, "FREQUENCY", 1, 0, 100) {

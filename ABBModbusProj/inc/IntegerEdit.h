@@ -19,7 +19,7 @@ public:
 	int getValue();
 	void setValue(int value);
 	void setStep(int _step);
-private:
+protected:
 	bool save();
 	void displayEditValue();
 	LiquidCrystal *lcd;

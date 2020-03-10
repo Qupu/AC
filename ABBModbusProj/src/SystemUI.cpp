@@ -6,6 +6,8 @@
  */
 
 #include "SystemUI.h"
+#include "DigitalIoPin.h"
+#include "MenuItem.h"
 
 // Private Methods:
 void SystemUI::switchMode() {
@@ -30,29 +32,29 @@ void SystemUI::switchMode() {
 
 SystemUI::SystemUI() {
 	//Set up the LCD display:
-	DigitalIOPin RS(0, 8, false, false, false);
-	DigitalIOPin EN(1, 6, false, false, false);
-	DigitalIOPin D0(1, 8, false, false, false);
-	DigitalIOPin D1(0, 5, false, false, false);
-	DigitalIOPin D2(0, 6, false, false, false);
-	DigitalIOPin D3(0, 7, false, false, false);
+	DigitalIoPin RS(0, 8, false, false, false);
+	DigitalIoPin EN(1, 6, false, false, false);
+	DigitalIoPin D0(1, 8, false, false, false);
+	DigitalIoPin D1(0, 5, false, false, false);
+	DigitalIoPin D2(0, 6, false, false, false);
+	DigitalIoPin D3(0, 7, false, false, false);
 
 	lcd = new LiquidCrystal(&RS, &EN, &D0, &D1, &D2, &D3);
 	lcd->begin(lcdWidth, lcdHeight);
 	lcd->setCursor(0,0);
 
 	// Set up the manual and automatic mode menus:
-	pressureItem = new PressureItem(lcd);
-	autoModeMenu.addItem(pressureItem);
+	pressureEdit = new PressureEdit(lcd);
+	autoModeMenu.addItem(new MenuItem(pressureEdit));
 
-	frequencyItem = new FrequencyItem(lcd);
-	manualModeMenu.addItem(frequencyItem);
+	frequencyEdit = new FrequencyEdit(lcd);
+	manualModeMenu.addItem(new MenuItem(frequencyEdit));
 
 }
 
 SystemUI::~SystemUI() {
-	delete pressureItem;
-	delete frequencyItem;
+	delete pressureEdit;
+	delete frequencyEdit;
 	delete lcd;
 }
 
@@ -63,9 +65,11 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
+			// Not implemented yet
 			break;
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
+			// Not implemented yet
 			break;
 
 		case (systemUIEvent::SELECT_SW_PRESSED):
@@ -74,8 +78,12 @@ void SystemUI::event(systemUIEvent e) {
 			// for each mode's menu.
 			break;
 
+		case (systemUIEvent::POWER_SW_PRESSED):
+			// Not implemented yet
+			break;
+
 		case (systemUIEvent::SHOW):
-			currMenu->event(show);
+			currMenu->event(MenuItem::menuEvent::show);
 			break;
 	}
 }
