@@ -7,7 +7,8 @@
 
 #include <PressureEdit.h>
 
-PressureEdit::PressureEdit(LiquidCrystal *lcd_, std::string editTitle, int _lowerLim, int _upperLim) : DecimalEdit(lcd_, editTitle, _lowerLim, _upperLim) {
+// TODO: Adjust step, lower limit and upperlimit for the PressureEdit:
+PressureEdit::PressureEdit(LiquidCrystal *lcd_) : DecimalEdit(lcd_, "PRESSURE:", 0.5, 0.0, 1.0) {
 	// TODO Auto-generated constructor stub
 
 }
@@ -15,4 +16,20 @@ PressureEdit::PressureEdit(LiquidCrystal *lcd_, std::string editTitle, int _lowe
 PressureEdit::~PressureEdit() {
 	// TODO Auto-generated destructor stub
 }
+
+void PressureEdit::display() {
+	lcd->clear();
+
+	lcd->setCursor(0,0);
+	lcd->print(title);
+	lcd->setCursor(0, SystemUI::lcdWidth-1);
+	lcd->print("A");
+
+	lcd->setCursor(0,1);
+	char s[17];
+	snprintf(s, 17, "      %.1f      ", edit);
+
+	lcd->print(s);
+}
+
 

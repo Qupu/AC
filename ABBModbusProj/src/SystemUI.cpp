@@ -38,12 +38,16 @@ SystemUI::SystemUI() {
 	DigitalIOPin D3(0, 7, false, false, false);
 
 	lcd = new LiquidCrystal(&RS, &EN, &D0, &D1, &D2, &D3);
-	lcd->begin(16,2);
+	lcd->begin(lcdWidth, lcdHeight);
 	lcd->setCursor(0,0);
 
 	// Set up the manual and automatic mode menus:
-	pressureItem = new PressureItem(lcd, "Pressure", 0, 100);
-	autoModeMenu
+	pressureItem = new PressureItem(lcd);
+	autoModeMenu.addItem(pressureItem);
+
+	frequencyItem = new FrequencyItem(lcd);
+	manualModeMenu.addItem(frequencyItem);
+
 }
 
 SystemUI::~SystemUI() {
@@ -65,7 +69,13 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::SELECT_SW_PRESSED):
-			// Not implemented
+			// No functionality implemented
+			// Could be used if there were more menu items
+			// for each mode's menu.
+			break;
+
+		case (systemUIEvent::SHOW):
+			currMenu->event(show);
 			break;
 	}
 }

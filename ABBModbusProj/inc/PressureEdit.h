@@ -12,7 +12,7 @@
 
 class PressureEdit : public DecimalEdit {
 public:
-	PressureEdit(LiquidCrystal *lcd_, std::string editTitle, int _lowerLim, int _upperLim);
+	PressureEdit(LiquidCrystal *lcd_);
 	virtual ~PressureEdit();
 	void display();
 };

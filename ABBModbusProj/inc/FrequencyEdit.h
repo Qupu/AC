@@ -9,10 +9,11 @@
 #define FREQUENCYEDIT_H_
 
 #include "PropertyEdit.h"
+#include "BarGraph.h"
 
 class FrequencyEdit : public IntegerEdit {
 public:
-	FrequencyEdit(LiquidCrystal *lcd_, std::string editTitle, int _lowerLim, int _upperLim);
+	FrequencyEdit(LiquidCrystal *lcd_);
 	virtual ~FrequencyEdit();
 	void display();
 
