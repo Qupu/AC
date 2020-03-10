@@ -65,11 +65,13 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
-			// Not implemented yet
+			currMenu->event(MenuItem::menuEvent::up);
+			currMenu->event(MenuItem::menuEvent::ok);
 			break;
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
-			// Not implemented yet
+			currMenu->event(MenuItem::menuEvent::down);
+			currMenu->event(MenuItem::menuEvent::ok);
 			break;
 
 		case (systemUIEvent::SELECT_SW_PRESSED):
