@@ -24,7 +24,8 @@ public:
 			DOWN_SW_PRESSED,
 			SELECT_SW_PRESSED,
 			MODE_SW_PRESSED,
-			SHOW
+			SHOW,
+			POWER_SW_PRESSED
 			// More Events?
 		};
 	SystemUI();

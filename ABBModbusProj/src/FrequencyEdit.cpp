@@ -26,6 +26,7 @@ void FrequencyEdit::display() {
 	lcd->setCursor(0, SystemUI::lcdWidth-1);
 	lcd->print("M");
 	lcd->setCursor(0,1);
+
 	// TODO: replace the code below with the BarGraph-drawing routine:
 	char s[17];
 	if(focus) {
