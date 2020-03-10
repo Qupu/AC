@@ -400,7 +400,7 @@ int main(void)
 	double press;
 	int setPressDiff = 10;
 
-	SystemUI UI;
+	SystemUI UI(true);
 	char manualMode[30] = "MANUAL";
 	char automaticMode[30] = "AUTOMATIC";
 	while(1) {
@@ -415,6 +415,23 @@ int main(void)
 		printf("\rValue goes down\n");
 		Sleep(2000);
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+
+		printf("\rTurning off Power\n");
+		UI.event(SystemUI::systemUIEvent::POWER_SW_PRESSED);
+		Sleep(1000);
+		UI.event(SystemUI::systemUIEvent::SHOW);
+		Sleep(1000);
+
+		printf("Trying to change the value down:");
+		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
+		Sleep(1000);
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		Sleep(1000);
+
+		printf("\rTurning on Power\n");
+		UI.event(SystemUI::systemUIEvent::POWER_SW_PRESSED);
+		Sleep(1000);
+
 		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
 		printf("\rMode Changes\n");
 		Sleep(2000);

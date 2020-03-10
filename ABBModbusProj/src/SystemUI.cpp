@@ -32,10 +32,17 @@ void SystemUI::switchMode() {
 	currMenu->event(MenuItem::menuEvent::show);
 }
 
+void SystemUI::displayPowerOff() {
+/*	lcd->clear();
+	lcd->setCursor(0,0);
+	lcd->print("POWER OFF...");*/
+	printf("POWER OFF...");
+}
+
 // ---------------------
 // The public interface:
 
-SystemUI::SystemUI() {
+SystemUI::SystemUI(bool _powerOn) {
 	//Set up the LCD display:
 	DigitalIoPin RS(0, 8, false, false, false);
 	DigitalIoPin EN(1, 6, false, false, false);
@@ -59,6 +66,8 @@ SystemUI::SystemUI() {
 	frequencyEdit->setValue(50);
 
 	currMenu = &autoModeMenu;
+
+	powerOn = _powerOn;
 }
 
 SystemUI::~SystemUI() {
@@ -70,17 +79,22 @@ SystemUI::~SystemUI() {
 void SystemUI::event(systemUIEvent e) {
 	switch (e) {
 		case (systemUIEvent::MODE_SW_PRESSED):
-			switchMode();
+			if (powerOn)
+				switchMode();
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
-			currMenu->event(MenuItem::menuEvent::up);
-		currMenu->event(MenuItem::menuEvent::ok);
+			if (powerOn) {
+				currMenu->event(MenuItem::menuEvent::up);
+				currMenu->event(MenuItem::menuEvent::ok);
+			}
 			break;
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
-			currMenu->event(MenuItem::menuEvent::down);
-		currMenu->event(MenuItem::menuEvent::ok);
+			if (powerOn) {
+				currMenu->event(MenuItem::menuEvent::down);
+				currMenu->event(MenuItem::menuEvent::ok);
+			}
 			break;
 
 		case (systemUIEvent::SELECT_SW_PRESSED):
@@ -90,11 +104,16 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::POWER_SW_PRESSED):
-			// Not implemented yet
+			powerOn = !powerOn;
 			break;
 
 		case (systemUIEvent::SHOW):
-			currMenu->event(MenuItem::menuEvent::show);
+			if (powerOn) {
+				currMenu->event(MenuItem::menuEvent::show);
+			}
+			else {
+				displayPowerOff();
+			}
 			break;
 	}
 }

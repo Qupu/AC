@@ -30,7 +30,7 @@ public:
 			POWER_SW_PRESSED
 			// More Events?
 		};
-	SystemUI();
+	SystemUI(bool _powerOn);
 	virtual ~SystemUI();
 	void event(systemUIEvent e);
 	OperationMode getOperationMode();
@@ -48,8 +48,10 @@ private:
 	FrequencyEdit *frequencyEdit;
 
 	void switchMode();
+	void displayPowerOff();
 
 	OperationMode mode;
+	bool powerOn;
 };
 
 #endif /* SYSTEMUI_H_ */
