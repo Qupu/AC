@@ -16,7 +16,7 @@ public:
 	void cancel();
 	void setFocus(bool focus);
 	bool getFocus();
-	virtual void display();
+	void display();
 	float getValue();
 	void setValue(float value);
 	void setStep(float _step);
@@ -31,7 +31,7 @@ protected:
 	float lowerLim;
 	float upperLim;
 	bool focus;
-	static constexpr float tolerance = 0.0001;
+	static constexpr float tolerance = 0.001;
 };
 
 #endif /* DECIMALEDIT_H_ */

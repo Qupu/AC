@@ -16,10 +16,11 @@ public:
 	PressureEdit(LiquidCrystal *lcd_);
 	virtual ~PressureEdit();
 	void display();
+	bool getFocus() {return true;}
 private:
-	const double step    = 0.5;
-	const double lowLim  = 0.0;
-	const double highLim = 100.0;
+	static constexpr float step    = 0.5;
+	static constexpr float lowLim  = 0.0;
+	static constexpr float highLim = 100.0;
 };
 
 #endif /* PRESSUREEDIT_H_ */

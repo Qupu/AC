@@ -20,7 +20,7 @@ PressureEdit::~PressureEdit() {
 }
 
 void PressureEdit::display() {
-	lcd->clear();
+/*	lcd->clear();
 
 	lcd->setCursor(0,0);
 	lcd->print(title);
@@ -31,7 +31,7 @@ void PressureEdit::display() {
 	char s[17];
 	snprintf(s, 17, "      %.1f      ", edit);
 
-	lcd->print(s);
+	lcd->print(s);*/
 }
 
 

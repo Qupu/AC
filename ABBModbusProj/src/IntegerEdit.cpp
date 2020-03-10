@@ -35,10 +35,11 @@ void IntegerEdit::cancel() {
 
 
 void IntegerEdit::setFocus(bool focus) {
+	this->focus = focus;
 }
 
 bool IntegerEdit::getFocus() {
-	return true;
+	return focus;
 }
 
 void IntegerEdit::display() {

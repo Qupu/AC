@@ -408,33 +408,33 @@ int main(void)
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		printf("\rValue goes down\n");
-		Sleep(1000);
+		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		printf("\rValue goes down\n");
-		Sleep(1000);
+		Sleep(2000);
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
 		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
 		printf("\rMode Changes\n");
-		Sleep(1000);
+		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		printf("\rValue goes down\n");
-		Sleep(1000);
+		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
-		Sleep(1000);
+		Sleep(2000);
 		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
 		printf("\rMode Changes\n");
-		Sleep(1000);
+		Sleep(2000);
 		UI.event(SystemUI::systemUIEvent::UP_SW_PRESSED);
 		printf("\rValue goes up\n");
-		Sleep(1000);
+		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
 		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
-		Sleep(1000);
+		Sleep(2000);
 	}
 
 	while(1)

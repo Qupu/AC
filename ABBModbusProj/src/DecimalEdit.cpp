@@ -35,10 +35,11 @@ void DecimalEdit::cancel() {
 
 
 void DecimalEdit::setFocus(bool focus) {
+	this->focus = focus;
 }
 
 bool DecimalEdit::getFocus() {
-	return true;
+	return focus;
 }
 
 void DecimalEdit::display() {

@@ -17,6 +17,7 @@ public:
 	FrequencyEdit(LiquidCrystal *lcd_);
 	virtual ~FrequencyEdit();
 	void display();
+	bool getFocus() { return true; }
 
 private:
 	const int barWidth = 20;
