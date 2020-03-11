@@ -15,12 +15,14 @@
 class FrequencyEdit : public IntegerEdit {
 public:
 	const int maxFrequency = 20000;
+	const int frequencyScale = 400;
+
 	FrequencyEdit(LiquidCrystal *lcd_);
 	virtual ~FrequencyEdit();
 	void display();
 	bool getFocus() { return true; }
 	int getValue() { return (maxFrequency*value)/highLim; }
-	void setValue(int _value) { IntegerEdit::setValue(_value/400); }
+	void setValue(int _value) { IntegerEdit::setValue(_value/frequencyScale); }
 	void setCurrPressure(double _currPressure) { currPressure = _currPressure; }
 
 private:

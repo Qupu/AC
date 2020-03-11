@@ -238,19 +238,37 @@ void startter(ModbusMaster& node)
     while(state != 5) {
 
         state = 0;
-        ControlWord = ControlWord | 0x8000;
+        // Set I and f to 0
         Sleep(5);
 
         switch(state)
         {
-        case(0): //not ready to switch on
-                ControlWord = ControlWord & 0xFFFE;
-                StatusWord = StatusWord & 0xFFFE;
+        case(0): //Not ready to switch on
+        		if (StatusWord & 0x0001)
+                	break;
 
+        		Sleep(5);
+        		ControlWord = 0xFFFE;
+        		Sleep(105);
+
+        case(1): // Ready to switch on
+        		if (!(StatusWord & 0x0001))
+        			break;
+
+        		Sleep(5);
+        		ControlWord = 0xFFFF;
+        		Sleep(5);
+
+        case (3): //  Ready to operate
+				if (!(StatusWord & 0x0002))
+					break;
+
+        		Sleep(5);
                 ControlWord = ControlWord | 0x0006;
+                Sleep(5);
 
                 Sleep(5);
-                if(ControlWord & (1<<2) && ControlWord & (1<<1) && ControlWord & (0<<0)) state = 1;
+                ControlWord & (1<<2) && ControlWord & (1<<1) && ControlWord & (0<<0)) state = 1;
 
         case(1): //ready to switch on
                 StatusWord = StatusWord | 0x0001;

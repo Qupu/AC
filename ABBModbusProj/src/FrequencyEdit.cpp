@@ -5,10 +5,9 @@
  *      Author: rqqht
  */
 
-#include <FrequencyEdit.h>
+#include "FrequencyEdit.h"
 #include "SystemUI.h"
 #include "IntegerEdit.h"
-#include "SystemUI.h"
 
 // TODO: Adjust the step for the edit menu
 FrequencyEdit::FrequencyEdit(LiquidCrystal *lcd_) : IntegerEdit(lcd_, "SPEED", step, lowLim, highLim) {
