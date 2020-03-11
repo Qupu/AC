@@ -34,13 +34,14 @@ public:
 	virtual ~SystemUI();
 	void event(systemUIEvent e);
 	OperationMode getOperationMode();
+	void setOperationMode(OperationMode _mode);
 	double getTargetPressure();
 	int getTargetFrequency();
 	void updateCurrPressure(double _currPressure);
 
 private:
+	// LiquidCrystal data:
 	LiquidCrystal *lcd;
-
 	DigitalIoPin RS;
 	DigitalIoPin EN;
 	DigitalIoPin D0;
@@ -48,13 +49,12 @@ private:
 	DigitalIoPin D2;
 	DigitalIoPin D3;
 
+	// Menu data:
 	SimpleMenu autoModeMenu;
 	SimpleMenu manualModeMenu;
 	SimpleMenu *currMenu;
-
 	PressureEdit *pressureEdit;
 	FrequencyEdit *frequencyEdit;
-
 	double currPressure;
 
 	void switchMode();

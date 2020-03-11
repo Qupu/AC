@@ -57,11 +57,11 @@ SystemUI::SystemUI(bool _powerOn) :
 	// Set up the manual and automatic mode menus:
 	pressureEdit = new PressureEdit(lcd);
 	autoModeMenu.addItem(new MenuItem(pressureEdit));
-	pressureEdit->setValue(50.0);
+	pressureEdit->setValue(0);
 
 	frequencyEdit = new FrequencyEdit(lcd);
 	manualModeMenu.addItem(new MenuItem(frequencyEdit));
-	frequencyEdit->setValue(20000);
+	frequencyEdit->setValue(0);
 
 	currMenu = &autoModeMenu;
 
@@ -98,8 +98,8 @@ void SystemUI::event(systemUIEvent e) {
 		case (systemUIEvent::SELECT_SW_PRESSED):
 			// No functionality implemented
 			//
-			// Could be used if there were more menu items
-			// for each mode's menu.
+			// Could be used if there were more menu items for each mode's menu.
+			//
 			// A few possibilities:
 			//   * "Show status" menu item
 			//   * "Modify lower limit/upper limit" menu items
@@ -120,6 +120,14 @@ void SystemUI::event(systemUIEvent e) {
 
 OperationMode SystemUI::getOperationMode() {
 	return mode;
+}
+
+void SystemUI::setOperationMode(OperationMode _mode) {
+	mode = _mode;
+	if (mode == OperationMode::AUTOMATIC)
+		currMenu = &autoModeMenu;
+	else
+		currMenu = &manualMode;
 }
 
 double SystemUI::getTargetPressure() {
