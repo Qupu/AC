@@ -35,6 +35,8 @@
 #include "SDPSensor.h"
 #include "Switch.h"
 #include "SystemUI.h"
+#include "pinint_handlers.cpp"
+#include "EdgePinInt.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -66,6 +68,9 @@ void SysTick_Handler(void)
 {
 	systicks++;
 	if(counter > 0) counter--;
+	if (pininterrupt_sw_counter > 0) {
+		--pininterrupt_sw_counter;
+	}
 }
 #ifdef __cplusplus
 }
@@ -233,42 +238,26 @@ void startter(ModbusMaster& node)
     ModbusRegister OutputFrequency(&node, 102);
     ModbusRegister Current(&node, 103);
 
-    int state;
+    int state = 0;
 
     while(state != 5) {
 
         state = 0;
-        // Set I and f to 0
+        ControlWord = ControlWord | 0x8000;
         Sleep(5);
 
         switch(state)
         {
-        case(0): //Not ready to switch on
-        		if (StatusWord & 0x0001)
-                	break;
+        case(0): //not ready to switch on
+        		Current = 0x0000;
+        		OutputFrequency = 0x0000;
+                ControlWord = ControlWord & 0xFFFE;
+                StatusWord = StatusWord & 0xFFFE;
 
-        		Sleep(5);
-        		ControlWord = 0xFFFE;
-        		Sleep(105);
-
-        case(1): // Ready to switch on
-        		if (!(StatusWord & 0x0001))
-        			break;
-
-        		Sleep(5);
-        		ControlWord = 0xFFFF;
-        		Sleep(5);
-
-        case (3): //  Ready to operate
-				if (!(StatusWord & 0x0002))
-					break;
-
-        		Sleep(5);
                 ControlWord = ControlWord | 0x0006;
-                Sleep(5);
 
                 Sleep(5);
-                ControlWord & (1<<2) && ControlWord & (1<<1) && ControlWord & (0<<0)) state = 1;
+                if(ControlWord & (1<<2) && ControlWord & (1<<1) && ControlWord & (0<<0)) state = 1;
 
         case(1): //ready to switch on
                 StatusWord = StatusWord | 0x0001;
@@ -430,146 +419,63 @@ int main(void)
 	/* Enable and setup SysTick Timer at a periodic rate */
 	SysTick_Config(SystemCoreClock / 1000);
 
-	Switch sw1(0,17,true,true,true);
-	Switch sw2(1,11,true,true,true);
-
-	Switch swe1(0,10,true,true,true);
+	EdgePinInt swe1(0, 0,24,true); 	//d8
+	EdgePinInt swe2(1, 0,9,true); 	//d3
+	EdgePinInt swe3(2, 0,10,true); 	//d4
+	EdgePinInt swe4(3, 3,1,true); 	//d6
+	ui_event_buffer = new EventBuffer(4);
 
 	SDPSensor sdp(0x40);
 	ModbusMaster node(2); // Create modbus object that connects to slave id 2
+
 	startter(node);
 
 	Board_LED_Set(0, false);
 	Board_LED_Set(1, true);
 
 	int freq = 0;
-
-	OperationMode mode = OperationMode::MANUAL;
-
-	double press;
-	int setPressDiff = 10;
+	int prev_freq = 0;
+	double press = 0;
 
 	SystemUI UI(true);
-	UI.updateCurrPressure(50.0);
-	char manualMode[30] = "MANUAL";
-	char automaticMode[30] = "AUTOMATIC";
-	while(1) {
-		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
-		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
-		printf("\rValue goes down\n");
-		Sleep(2000);
-		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
-		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
-		printf("\rValue goes down\n");
-		Sleep(2000);
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
+	UI.event(SystemUI::systemUIEvent::SHOW);
+	OperationMode mode = UI.getOperationMode();
+	UI.updateCurrPressure(press);
 
-		printf("\rTurning off Power\n");
-		UI.event(SystemUI::systemUIEvent::POWER_SW_PRESSED);
-		Sleep(1000);
-		UI.event(SystemUI::systemUIEvent::SHOW);
-		Sleep(1000);
-
-		printf("Trying to change the value down:");
-		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
-		Sleep(1000);
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
-		Sleep(1000);
-
-		printf("\rTurning on Power\n");
-		UI.event(SystemUI::systemUIEvent::POWER_SW_PRESSED);
-		Sleep(1000);
-
-		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
-		printf("\rMode Changes\n");
-		Sleep(2000);
-		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
-		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
-		printf("\rValue goes down\n");
-		Sleep(2000);
-		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
-		Sleep(2000);
-		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
-		printf("\rMode Changes\n");
-		Sleep(2000);
-		UI.event(SystemUI::systemUIEvent::UP_SW_PRESSED);
-		printf("\rValue goes up\n");
-		Sleep(2000);
-		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
-		Sleep(2000);
-	}
-
-	while(1)
+	while (1)
 	{
-		switch (mode) {
-			case (OperationMode::AUTOMATIC):
-				if(press < setPressDiff-1) freq += 40;
-				else if (press > setPressDiff+1) freq -= 40;
-
-				if(sw1.read()) {
-					printf("\rpressed sw1\n");
-					setPressDiff += 1;
-
-					while(sw1.read());
-				}
-
-				if(sw2.read())
-				{
-					printf("\rpressed s2\n");
-
-					setPressDiff -= 1;
-
-					while(sw2.read());
-				}
-
-				if(swe1.read()) {
-					mode = OperationMode::MANUAL;
-					printf("\rautomode off\n");
-					while(swe1.read());
-				}
-
-				printf("\rpressdiff %d\n",setPressDiff);
-
-			break;
-
-			case (OperationMode::MANUAL):
-				if(sw1.read()) {
-					printf("\rpressed sw1\n");
-					freq += 2000;
-
-					while(sw1.read());
-				}
-
-				if(sw2.read())
-				{
-					printf("/rpressed s2\n");
-					freq -= 2000;
-
-					while(sw2.read());
-				}
-
-				if(swe1.read()) {
-					mode = OperationMode::MANUAL;
-					printf("\rautomode on\n");
-					while(swe1.read());
-				}
-
-				break;
+		//go through the buffer
+		while (!ui_event_buffer->empty()) {
+			SystemUI::systemUIEvent event = ui_event_buffer->shift();
+			UI.event(event);
+			if (event == SystemUI::systemUIEvent::MODE_SW_PRESSED)
+				mode = UI.getOperationMode();
 		}
 
 		sdp.ReadPressure(press);
-		setFrequency(node,freq);
+		UI.updateCurrPressure(press);
 
-		printf("\r%.2f",press);
-		printf("\r%d\n",freq);
+		prev_freq = freq;
+
+		if (mode == OperationMode::AUTOMATIC)	{
+			if(press < UI.getTargetPressure() - 1)
+				if (freq <= FrequencyEdit::maxFrequency - FrequencyEdit::frequencyScale)
+					freq += FrequencyEdit::frequencyScale;
+				else
+					freq = FrequencyEdit::maxFrequency;
+
+			else if (press > UI.getTargetPressure() + 1) {
+				if (freq >= FrequencyEdit::frequencyScale) freq -= FrequencyEdit::frequencyScale;
+				else freq = 0;
+			}
+		} else if (mode == OperationMode::MANUAL) {
+			freq = UI.getTargetFrequency();
+		}
+
+		if (freq != prev_freq) {
+			setFrequency(node, freq);
+		}
 	}
-
-	abbModbusTest();
 
 	return 1;
 }

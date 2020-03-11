@@ -129,7 +129,7 @@ void SystemUI::setOperationMode(OperationMode _mode) {
 	if (mode == OperationMode::AUTOMATIC)
 		currMenu = &autoModeMenu;
 	else
-		currMenu = &manualMode;
+		currMenu = &manualModeMenu;
 }
 
 double SystemUI::getTargetPressure() {
