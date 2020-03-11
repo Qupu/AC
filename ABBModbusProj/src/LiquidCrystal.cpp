@@ -10,34 +10,39 @@
 
 void delayMicroseconds(unsigned int us)
 {
-	// implement with RIT
+	// calculate compare value:
+		uint64_t comp = (uint64_t)Chip_Clock_GetSystemClockRate() / 1000000;
+		comp *= (uint64_t)us;
+
+		// disable RIT – compare value may only be changed when RIT is disabled:
+		LPC_RITIMER->CTRL &= 0xF7;
+
+		// set compare value to RIT:
+		LPC_RITIMER->COMPVAL   = (uint32_t) comp;
+		LPC_RITIMER->COMPVAL_H = (uint32_t) (comp >> 32);
+
+		// clear RIT counter (so that counting starts from zero):
+		LPC_RITIMER->COUNTER = 0x00;
+		LPC_RITIMER->COUNTER_H = 0x00;
+
+		// enable RIT:
+		LPC_RITIMER->CTRL |= 0x08;
+
+		// wait until RIT Int flag is set:
+		while (!(LPC_RITIMER->CTRL & 0x01)) ;
+
+		// disable RIT:
+		LPC_RITIMER->CTRL &= 0xF7;
+
+		// clear RIT Int flag:
+		LPC_RITIMER->CTRL |= 0x01;
 }
-
-// When the display powers up, it is configured as follows:
-//
-// 1. Display clear
-// 2. Function set:
-//    DL = 1; 8-bit interface data
-//    N = 0; 1-line display
-//    F = 0; 5x8 dot character font
-// 3. Display on/off control:
-//    D = 0; Display off
-//    C = 0; Cursor off
-//    B = 0; Blinking off
-// 4. Entry mode set:
-//    I/D = 1; Increment by 1
-//    S = 0; No shift
-//
-// Note, however, that resetting the Arduino doesn't reset the LCD, so we
-// can't assume that its in that state when a sketch starts (and the
-// LiquidCrystal constructor is called).
-
-
-
 
 LiquidCrystal::LiquidCrystal(DigitalIoPin *rs,  DigitalIoPin *enable,
 			     DigitalIoPin *d0, DigitalIoPin *d1, DigitalIoPin *d2, DigitalIoPin *d3)
 {
+  Chip_RIT_Init(LPC_RITIMER);
+
   rs_pin = rs;
   enable_pin = enable;
 
@@ -142,10 +147,14 @@ void LiquidCrystal::home()
 
 void LiquidCrystal::print(std::string const &s)
 {
+	print(s.c_str());
 }
 
 void LiquidCrystal::print(const char *s)
 {
+	int i=0;
+	char next;
+	while ((next = s[i++]) != '\0') write(next);
 }
 
 void LiquidCrystal::setCursor(uint8_t col, uint8_t row)

@@ -41,18 +41,17 @@ void SystemUI::displayPowerOff() {
 // ---------------------
 // The public interface:
 
-SystemUI::SystemUI(bool _powerOn) {
+SystemUI::SystemUI(bool _powerOn) :
+		RS(0, 8, false, false, false),
+		EN(1, 6, false, false, false),
+		D0(1, 8, false, false, false),
+		D1(0, 5, false, false, false),
+		D2(0, 6, false, false, false),
+		D3(0, 7, false, false, false)
+{
 	//Set up the LCD display:
-	DigitalIoPin RS(0, 8, false, false, false);
-	DigitalIoPin EN(1, 6, false, false, false);
-	DigitalIoPin D0(1, 8, false, false, false);
-	DigitalIoPin D1(0, 5, false, false, false);
-	DigitalIoPin D2(0, 6, false, false, false);
-	DigitalIoPin D3(0, 7, false, false, false);
-
 	lcd = new LiquidCrystal(&RS, &EN, &D0, &D1, &D2, &D3);
 	lcd->begin(lcdWidth, lcdHeight);
-	lcd->clear();
 	lcd->setCursor(0,0);
 
 	// Set up the manual and automatic mode menus:
@@ -62,7 +61,7 @@ SystemUI::SystemUI(bool _powerOn) {
 
 	frequencyEdit = new FrequencyEdit(lcd);
 	manualModeMenu.addItem(new MenuItem(frequencyEdit));
-	frequencyEdit->setValue(50);
+	frequencyEdit->setValue(20000);
 
 	currMenu = &autoModeMenu;
 
@@ -128,5 +127,11 @@ double SystemUI::getTargetPressure() {
 }
 
 int SystemUI::getTargetFrequency() {
-	frequencyEdit->getValue();
+	return frequencyEdit->getValue();
+}
+
+void SystemUI::updateCurrPressure(double _currPressure) {
+	currPressure = _currPressure;
+	pressureEdit->setCurrPressure(_currPressure);
+	frequencyEdit->setCurrPressure(_currPressure);
 }

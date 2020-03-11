@@ -1,7 +1,7 @@
 #include "DecimalEdit.h"
 #include <cstdio>
 
-DecimalEdit::DecimalEdit(LiquidCrystal *lcd_, std::string editTitle, float _step, float _lowerLim, float _upperLim): lcd(lcd_), title(editTitle) {
+DecimalEdit::DecimalEdit(LiquidCrystal *lcd_, std::string editTitle, double _step, double _lowerLim, double _upperLim): lcd(lcd_), title(editTitle) {
 	value = 0;
 	edit = 0;
 	step = _step;
@@ -71,10 +71,10 @@ bool DecimalEdit::save() {
 }
 
 
-float DecimalEdit::getValue() {
+double DecimalEdit::getValue() {
 	return value;
 }
-void DecimalEdit::setValue(float value) {
+void DecimalEdit::setValue(double value) {
 	if (value < lowerLim)
 		value = lowerLim;
 	else if (value > upperLim)
@@ -84,6 +84,6 @@ void DecimalEdit::setValue(float value) {
 	save();
 }
 
-void DecimalEdit::setStep(float _step) {
+void DecimalEdit::setStep(double _step) {
 	step = _step;
 }

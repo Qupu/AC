@@ -226,36 +226,67 @@ bool setFrequency(ModbusMaster& node, uint16_t freq)
 
 void startter(ModbusMaster& node)
 {
-	node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
+    node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
 
-	ModbusRegister ControlWord(&node, 0);
-	ModbusRegister StatusWord(&node, 3);
-	ModbusRegister OutputFrequency(&node, 102);
-	ModbusRegister Current(&node, 103);
+    ModbusRegister ControlWord(&node, 0);
+    ModbusRegister StatusWord(&node, 3);
+    ModbusRegister OutputFrequency(&node, 102);
+    ModbusRegister Current(&node, 103);
 
+    int state;
 
-	// need to use explicit conversion since printf's variable argument doesn't automatically convert this to an integer
-	printf("Status=%04X\n", (int)StatusWord); // for debugging
+    while(state != 5) {
 
-	ControlWord = 0x0406; // prepare for starting
+        state = 0;
+        ControlWord = ControlWord | 0x8000;
+        Sleep(5);
 
-	printf("Status=%04X\n", (int)StatusWord); // for debugging
+        switch(state)
+        {
+        case(0): //not ready to switch on
+                ControlWord = ControlWord & 0xFFFE;
+                StatusWord = StatusWord & 0xFFFE;
 
-	Sleep(1000); // give converter some time to set up
-	// note: we should have a startup state machine that check converter status and acts per current status
-	//       but we take the easy way out and just wait a while and hope that everything goes well
+                ControlWord = ControlWord | 0x0006;
 
-	printf("Status=%04X\n", (int)StatusWord); // for debugging
+                Sleep(5);
+                if(ControlWord & (1<<2) && ControlWord & (1<<1) && ControlWord & (0<<0)) state = 1;
 
-	ControlWord = 0x047F; // set drive to start mode
+        case(1): //ready to switch on
+                StatusWord = StatusWord | 0x0001;
 
-	printf("Status=%04X\n", (int)StatusWord); // for debugging
+                ControlWord = ControlWord | 0x0007;
 
-	Sleep(1000); // give converter some time to set up
-	// note: we should have a startup state machine that check converter status and acts per current status
-	//       but we take the easy way out and just wait a while and hope that everything goes well
+                Sleep(5);
+                if(ControlWord & (1<<2) && ControlWord & (1<<1) && ControlWord & (1<<0)) state = 2;
+        case(2): //ready to operte
+                StatusWord = StatusWord | 0x0002;
 
-	printf("Status=%04X\n", (int)StatusWord); // for debugging
+                ControlWord = ControlWord | 0x0008;
+                StatusWord = StatusWord | 0x1000;
+
+                Sleep(5);
+                if(ControlWord & (1<<3) && StatusWord & (1<<12)) state = 3;
+
+        case(3): //operation enabled
+                StatusWord = StatusWord | 0x0004;
+
+                ControlWord = ControlWord | 0x0020;
+
+                Sleep(5);
+                if(ControlWord & (1<<5)) state = 4;
+
+        case(4): //RFG: ACCELERATORENABLED
+                ControlWord = ControlWord | 0x0040;
+
+                Sleep(5);
+                if(ControlWord & (1<<6)) state = 5;
+
+        case(5): //operating
+                StatusWord = StatusWord | 0x0080;
+                Sleep(5);
+        }
+    }
 }
 
 void abbModbusTest()
@@ -401,20 +432,21 @@ int main(void)
 	int setPressDiff = 10;
 
 	SystemUI UI(true);
+	UI.updateCurrPressure(50.0);
 	char manualMode[30] = "MANUAL";
 	char automaticMode[30] = "AUTOMATIC";
 	while(1) {
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		printf("\rValue goes down\n");
 		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		printf("\rValue goes down\n");
 		Sleep(2000);
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 
 		printf("\rTurning off Power\n");
 		UI.event(SystemUI::systemUIEvent::POWER_SW_PRESSED);
@@ -425,7 +457,7 @@ int main(void)
 		printf("Trying to change the value down:");
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		Sleep(1000);
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 		Sleep(1000);
 
 		printf("\rTurning on Power\n");
@@ -436,12 +468,12 @@ int main(void)
 		printf("\rMode Changes\n");
 		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 		UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
 		printf("\rValue goes down\n");
 		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 		Sleep(2000);
 		UI.event(SystemUI::systemUIEvent::MODE_SW_PRESSED);
 		printf("\rMode Changes\n");
@@ -450,7 +482,7 @@ int main(void)
 		printf("\rValue goes up\n");
 		Sleep(2000);
 		printf("\r %s\n", (UI.getOperationMode() == OperationMode::MANUAL? manualMode: automaticMode));
-		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getFrequency(), UI.getPressure());
+		printf("\rFREQUENCY: %2d PRESSURE: %.2f\n", UI.getTargetFrequency(), UI.getTargetPressure());
 		Sleep(2000);
 	}
 

@@ -14,18 +14,26 @@
 
 class FrequencyEdit : public IntegerEdit {
 public:
+	const int maxFrequency = 20000;
 	FrequencyEdit(LiquidCrystal *lcd_);
 	virtual ~FrequencyEdit();
 	void display();
 	bool getFocus() { return true; }
+	int getValue() { return (maxFrequency*value)/highLim; }
+	void setValue(int _value) { IntegerEdit::setValue(_value/400); }
+	void setCurrPressure(double _currPressure) { currPressure = _currPressure; }
 
 private:
-	const int barWidth = 20;
+	const int barWidth = 50;
 	BarGraph *graph;
 
-	static constexpr float step = 800;
-		static constexpr float lowLim  = 0;
-		static constexpr float highLim = 20000;
+	double currPressure;
+
+	static constexpr float step = 1;
+	static constexpr float lowLim  = 0;
+	static constexpr float highLim = 50;
+
+
 };
 
 #endif /* FREQUENCYEDIT_H_ */

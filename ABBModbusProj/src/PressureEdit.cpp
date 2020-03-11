@@ -18,13 +18,16 @@ void PressureEdit::display() {
 
 	lcd->setCursor(0,0);
 	lcd->print(title);
-	lcd->setCursor(0, SystemUI::lcdWidth-1);
+	lcd->setCursor(SystemUI::lcdWidth-1, 0);
 	lcd->print("A");
 
 	lcd->setCursor(0,1);
-	char s[17];
-	snprintf(s, 17, "      %.1f      ", edit);
+	char s[10];
+	snprintf(s, 10, "[%3d]", (int)(edit+0.5));
+	lcd->print(s);
 
+	snprintf(s, 10, "%3d Pa", (int)(currPressure+0.5));
+	lcd->setCursor(SystemUI::lcdWidth-6, 1);
 	lcd->print(s);
 }
 

@@ -30,6 +30,7 @@ bool MenuItem::event(menuEvent e) {
 			pe->setFocus(true);
 		}
 		break;
+
 	case back:
 		if(pe->getFocus()) {
 			pe->cancel();
@@ -39,16 +40,20 @@ bool MenuItem::event(menuEvent e) {
 			handled = false;
 		}
 		break;
+
 	case show:
 		break;
+
 	case up:
 		if(pe->getFocus()) pe->increment();
 		else handled = false;
 		break;
+
 	case down:
 		if(pe->getFocus()) pe->decrement();
 		else handled = false;
 		break;
+
 	}
 	if(handled) pe->display();
 
