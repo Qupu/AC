@@ -38,6 +38,12 @@ void SystemUI::displayPowerOff() {
 	lcd->print("POWER OFF...");
 }
 
+void SystemUI::displayLatencyError() {
+	lcd->clear();
+	lcd->setCursor(0,0);
+	lcd->print("TARGET PRESSURE NOT REACHABLE");
+}
+
 // ---------------------
 // The public interface:
 
@@ -116,6 +122,11 @@ void SystemUI::event(systemUIEvent e) {
 		case (systemUIEvent::SHOW):
 			if (powerOn) currMenu->event(MenuItem::menuEvent::show);
 			else displayPowerOff();
+			break;
+
+		case (SystemUIEvent::TARGET_PRESSURE_LATENCY_ERROR):
+			if (powerOn)
+				displayLatencyError();
 			break;
 	}
 }

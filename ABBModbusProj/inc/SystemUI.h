@@ -27,7 +27,8 @@ public:
 			SELECT_SW_PRESSED,
 			MODE_SW_PRESSED,
 			SHOW,
-			POWER_SW_PRESSED
+			POWER_SW_PRESSED,
+			TARGET_PRESSURE_LATENCY_ERROR
 			// More Events?
 		};
 	SystemUI(bool _powerOn);
@@ -59,6 +60,7 @@ private:
 
 	void switchMode();
 	void displayPowerOff();
+	void displayLatencyError();
 
 	OperationMode mode;
 	bool powerOn;
