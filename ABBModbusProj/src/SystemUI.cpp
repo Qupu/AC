@@ -65,7 +65,9 @@ SystemUI::SystemUI(bool _powerOn) :
 
 	currMenu = &autoModeMenu;
 
+	// General setups:
 	powerOn = _powerOn;
+	mode = OperationMode::MANUAL;
 }
 
 SystemUI::~SystemUI() {
