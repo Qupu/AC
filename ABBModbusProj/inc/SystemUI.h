@@ -34,8 +34,8 @@ public:
 	virtual ~SystemUI();
 	void event(systemUIEvent e);
 	OperationMode getOperationMode();
-	double getPressure();
-	int getFrequency();
+	double getTargerPressure();
+	int getTargetFrequency();
 
 private:
 	LiquidCrystal *lcd;

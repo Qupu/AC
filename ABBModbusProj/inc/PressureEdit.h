@@ -18,9 +18,9 @@ public:
 	void display();
 	bool getFocus() {return true;}
 private:
-	static constexpr float step    = 0.5;
+	static constexpr float step    = 1.0;
 	static constexpr float lowLim  = 0.0;
-	static constexpr float highLim = 100.0;
+	static constexpr float highLim = 125.0;
 };
 
 #endif /* PRESSUREEDIT_H_ */

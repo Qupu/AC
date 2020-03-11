@@ -22,6 +22,10 @@ public:
 private:
 	const int barWidth = 20;
 	BarGraph *graph;
+
+	static constexpr float step = 800;
+		static constexpr float lowLim  = 0;
+		static constexpr float highLim = 20000;
 };
 
 #endif /* FREQUENCYEDIT_H_ */

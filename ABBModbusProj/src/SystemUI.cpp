@@ -33,10 +33,9 @@ void SystemUI::switchMode() {
 }
 
 void SystemUI::displayPowerOff() {
-/*	lcd->clear();
+	lcd->clear();
 	lcd->setCursor(0,0);
-	lcd->print("POWER OFF...");*/
-	printf("POWER OFF...");
+	lcd->print("POWER OFF...");
 }
 
 // ---------------------
@@ -71,8 +70,8 @@ SystemUI::SystemUI(bool _powerOn) {
 }
 
 SystemUI::~SystemUI() {
-	delete pressureEdit;
 	delete frequencyEdit;
+	delete pressureEdit;
 	delete lcd;
 }
 
@@ -99,21 +98,23 @@ void SystemUI::event(systemUIEvent e) {
 
 		case (systemUIEvent::SELECT_SW_PRESSED):
 			// No functionality implemented
+			//
 			// Could be used if there were more menu items
 			// for each mode's menu.
+			// A few possibilities:
+			//   * "Show status" menu item
+			//   * "Modify lower limit/upper limit" menu items
+			//   * "Timed frequency boost" menu item for manual mode
 			break;
 
 		case (systemUIEvent::POWER_SW_PRESSED):
 			powerOn = !powerOn;
+			displayPowerOff();
 			break;
 
 		case (systemUIEvent::SHOW):
-			if (powerOn) {
-				currMenu->event(MenuItem::menuEvent::show);
-			}
-			else {
-				displayPowerOff();
-			}
+			if (powerOn) currMenu->event(MenuItem::menuEvent::show);
+			else displayPowerOff();
 			break;
 	}
 }
@@ -122,10 +123,10 @@ OperationMode SystemUI::getOperationMode() {
 	return mode;
 }
 
-double SystemUI::getPressure() {
+double SystemUI::getTargetPressure() {
 	return pressureEdit->getValue();
 }
 
-int SystemUI::getFrequency() {
+int SystemUI::getTargetFrequency() {
 	frequencyEdit->getValue();
 }
