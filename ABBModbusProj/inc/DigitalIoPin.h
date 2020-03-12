@@ -9,7 +9,7 @@ public:
     bool read() volatile;
     void write(bool value) volatile;
  
-private:
+protected:
 	volatile int port;
 	volatile int pin;
 	volatile int input;

@@ -8,7 +8,9 @@
 #ifndef EDGEPININT_H_
 #define EDGEPININT_H_
 
-class EdgePinInt {
+#include "DigitalIoPin.h"
+
+class EdgePinInt : public DigitalIoPin {
 public:
 	EdgePinInt(int int_nr, int port, int pin, bool high = true);
 	virtual ~EdgePinInt();
