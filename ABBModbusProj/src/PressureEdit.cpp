@@ -6,10 +6,10 @@
  */
 
 #include <PressureEdit.h>
-#include "DecimalEdit.h"
+#include "IntegerEdit.h"
 #include "SystemUI.h"
 
-PressureEdit::PressureEdit(LiquidCrystal *lcd_) : DecimalEdit(lcd_, "PRESSURE", step, lowLim, highLim) { }
+PressureEdit::PressureEdit(LiquidCrystal *lcd_) : IntegerEdit(lcd_, "PRESSURE", step, lowLim, highLim) { }
 
 PressureEdit::~PressureEdit() { }
 
@@ -23,7 +23,7 @@ void PressureEdit::display() {
 
 	lcd->setCursor(0,1);
 	char s[10];
-	snprintf(s, 10, "[%3d]", (int)(edit+0.5));
+	snprintf(s, 10, "[%3d]", edit);
 	lcd->print(s);
 
 	snprintf(s, 10, "%3d Pa", (int)(currPressure+0.5));

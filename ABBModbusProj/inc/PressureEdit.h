@@ -8,10 +8,10 @@
 #ifndef PRESSUREEDIT_H_
 #define PRESSUREEDIT_H_
 
-#include "DecimalEdit.h"
+#include "IntegerEdit.h"
 #include "LiquidCrystal.h"
 
-class PressureEdit : public DecimalEdit {
+class PressureEdit : public IntegerEdit {
 public:
 	PressureEdit(LiquidCrystal *lcd_);
 	virtual ~PressureEdit();
@@ -20,9 +20,9 @@ public:
 	void setCurrPressure(double _currPressure) { currPressure = _currPressure; }
 
 private:
-	static constexpr float step    = 1.0;
-	static constexpr float lowLim  = 0.0;
-	static constexpr float highLim = 125.0;
+	static const int step = 1;
+	static const int lowLim  = 0;
+	static const int highLim = 125;
 
 	double currPressure;
 };
