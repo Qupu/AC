@@ -64,6 +64,7 @@ private:
 
 	OperationMode mode;
 	bool powerOn;
+	bool error;
 };
 
 #endif /* SYSTEMUI_H_ */

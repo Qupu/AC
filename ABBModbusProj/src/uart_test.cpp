@@ -242,54 +242,73 @@ void startter(ModbusMaster& node)
 
     int state = 0;
 
-    while(state != 6) {
-
-        Current = 0x0000;
-        OutputFrequency = 0x0000;
-        ControlWord = 0x0000;
-        Sleep(5);
-
+    while(state != 7) {
         switch(state)
         {
-            case(0): //not ready to switch on
-                    if (StatusWord & 0x0001) break;
+            case(0): // Start:
+					 Current = 0x0000;
+            		 Sleep(5);
+		             OutputFrequency = 0x0000;
+		             Sleep(5);
+		             ControlWord = 0x0000;
+		             Sleep(5);
 
+		             if (StatusWord & 0x0001) state = 2;
+		             else state = 1;
+		        break;
+
+            case(1): //not ready to switch on
                     Sleep(110);
                     ControlWord = 0x0006;
                     Sleep(5);
+                    state = 2;
 
-            case(1): //ready to switch on
-                    if (!(StatusWord & 0x0001)) break;
+            case(2): //ready to switch on
+                    if (!(StatusWord & 0x0001)) {
+                    	state = 0;
+                    	Sleep(5);
+                    	break;
+                    }
 
                     Sleep(5);
                     ControlWord = 0x0007;
                     Sleep(5);
 
-            case(2): //ready to operte
-                    if (!(StatusWord & 0x0002)) break;
+            case(3): //ready to operte
+                    if (!(StatusWord & 0x0802)) {
+                    	state = 0;
+                    	Sleep(5);
+                    	break;
+                    }
 
                     Sleep(5);
-                    if (!(StatusWord & 0x0800)) break;
 
-                    Sleep(5);
                     ControlWord = 0x000F;
                     Sleep(5);
 
-            case(3): //operation enabled
-                    if (!(StatusWord & 0x0004)) break;
+            case(4): //operation enabled
+                    if (!(StatusWord & 0x0004)) {
+                    	state = 0;
+                    	Sleep(5);
+                    	break;
+                    }
 
                     Sleep(5);
                     ControlWord = 0x002F;
                     Sleep(5);
 
-            case(4): //RFG: ACCELERATORENABLED
+            case(5): //RFG: ACCELERATORENABLED
                     ControlWord = 0x006F;
                     Sleep(5);
 
-            case(5): //operating
-                    if(!(StatusWord & 0x0080)) break;
+            case(6): //operating
+                    if(!(StatusWord & 0x0080)) {
+                    	state = 0;
+                    	Sleep(5);
+                    	break;
+                    }
 
-                    state = 6;
+                    state = 7;
                     Sleep(5);
         }
     }
