@@ -8,13 +8,6 @@
 #include "SystemUI.h"
 #include "DigitalIoPin.h"
 #include "MenuItem.h"
-#include <exception>
-
-struct InvalidModeException : public std::exception {
-   const char * what () const throw () {
-      return "Invalid operation mode";
-   }
-};
 
 // Private Methods:
 void SystemUI::switchMode() {
@@ -42,6 +35,10 @@ void SystemUI::displayLatencyError() {
 	lcd->clear();
 	lcd->setCursor(0,0);
 	lcd->print("TARGET PRESSURE NOT REACHABLE");
+
+	lcd->setCursor(lcdWidth-1, 0);
+	lcd->print("E");
+	lcd->setCursor(0,1);
 }
 
 // ---------------------
@@ -116,7 +113,8 @@ void SystemUI::event(systemUIEvent e) {
 
 		case (systemUIEvent::POWER_SW_PRESSED):
 			powerOn = !powerOn;
-			displayPowerOff();
+			if (powerOn) currMenu->event(MenuItem::menuEvent::show);
+			else displayPowerOff();
 			break;
 
 		case (systemUIEvent::SHOW):
