@@ -128,15 +128,16 @@ void SystemUI::event(systemUIEvent e) {
 			break;
 
 		case (systemUIEvent::POWER_SW_PRESSED):
-			withErrorAck(
-				powerOn = !powerOn;
-				if (powerOn) {
-					currMenu->event(MenuItem::menuEvent::show);
-				}
-				else {
+			if (!powerOn) {
+				powerOn = true;
+				currMenu->event(MenuItem::menuEvent::show);
+			}
+			else {
+				withErrorAck(
+					powerOn = false;
 					displayPowerOff();
-				}
-			)
+				)
+			}
 			break;
 
 		case (systemUIEvent::SHOW):

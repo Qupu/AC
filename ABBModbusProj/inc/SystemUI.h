@@ -58,13 +58,14 @@ private:
 	FrequencyEdit *frequencyEdit;
 	double currPressure;
 
-	void switchMode();
-	void displayPowerOff();
-	void displayLatencyError();
-
+	// General variables:
 	OperationMode mode;
 	bool powerOn;
 	bool error;
+
+	void switchMode();
+	void displayPowerOff();
+	void displayLatencyError();
 };
 
 #endif /* SYSTEMUI_H_ */
