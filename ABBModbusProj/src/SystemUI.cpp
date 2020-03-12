@@ -66,11 +66,10 @@ SystemUI::SystemUI(bool _powerOn) :
 	manualModeMenu.addItem(new MenuItem(frequencyEdit));
 	frequencyEdit->setValue(0);
 
-	currMenu = &autoModeMenu;
-
 	// General setups:
 	powerOn = _powerOn;
 	mode = OperationMode::MANUAL;
+	currMenu = &manualModeMenu;
 }
 
 SystemUI::~SystemUI() {
