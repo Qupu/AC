@@ -124,7 +124,7 @@ void SystemUI::event(systemUIEvent e) {
 			else displayPowerOff();
 			break;
 
-		case (SystemUIEvent::TARGET_PRESSURE_LATENCY_ERROR):
+		case (systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR):
 			if (powerOn)
 				displayLatencyError();
 			break;

@@ -9,13 +9,13 @@
 #ifndef PININT_HANDLERS_CPP_
 #define PININT_HANDLERS_CPP_
 
-#include <EventBuffer.h>
+#include "EventBuffer.h"
 #include <atomic>
 #include "SystemUI.h"
 
 static const int pininterrupt_sw_interval = 20;
-static EventBuffer * ui_event_buffer;
-static volatile std::atomic_int pininterrupt_sw_counter;
+EventBuffer *ui_event_buffer;
+volatile std::atomic_int pininterrupt_sw_counter;
 
 #ifdef __cplusplus
 extern "C" {

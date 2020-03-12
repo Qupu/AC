@@ -27,16 +27,16 @@
 
 #include <cstring>
 #include <cstdio>
+#include <atomic>
 
 #include "ModbusMaster.h"
 #include "ModbusRegister.h"
 #include "LpcUart.h"
 #include "DigitalIoPin.h"
 #include "SDPSensor.h"
-#include "Switch.h"
 #include "SystemUI.h"
-#include "pinint_handlers.cpp"
 #include "EdgePinInt.h"
+#include "EventBuffer.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -45,6 +45,8 @@
 /*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
+extern EventBuffer * ui_event_buffer;
+extern volatile std::atomic_int pininterrupt_sw_counter;
 
 /*****************************************************************************
  * Private functions
@@ -244,7 +246,7 @@ void startter(ModbusMaster& node)
 
         Current = 0x0000;
         OutputFrequency = 0x0000;
-        ControlWord = 0x8000;
+        ControlWord = 0x0000;
         Sleep(5);
 
         switch(state)
@@ -253,14 +255,14 @@ void startter(ModbusMaster& node)
                     if (StatusWord & 0x0001) break;
 
                     Sleep(110);
-                    ControlWord = 0x8006;
+                    ControlWord = 0x0006;
                     Sleep(5);
 
             case(1): //ready to switch on
                     if (!(StatusWord & 0x0001)) break;
 
                     Sleep(5);
-                    ControlWord = 0x8007;
+                    ControlWord = 0x0007;
                     Sleep(5);
 
             case(2): //ready to operte
@@ -270,22 +272,22 @@ void startter(ModbusMaster& node)
                     if (!(StatusWord & 0x0800)) break;
 
                     Sleep(5);
-                    ControlWord = ControlWord | 0x0008;
+                    ControlWord = 0x000F;
                     Sleep(5);
 
             case(3): //operation enabled
                     if (!(StatusWord & 0x0004)) break;
 
                     Sleep(5);
-                    ControlWord = ControlWord | 0x0020;
+                    ControlWord = 0x002F;
                     Sleep(5);
 
             case(4): //RFG: ACCELERATORENABLED
-                    ControlWord = ControlWord | 0x0040;
+                    ControlWord = 0x006F;
                     Sleep(5);
 
             case(5): //operating
-                    if(!StatusWord & 0x0080) break;
+                    if(!(StatusWord & 0x0080)) break;
 
                     state = 6;
                     Sleep(5);
