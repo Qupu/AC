@@ -185,4 +185,6 @@ void SystemUI::updateCurrPressure(double _currPressure) {
 	currPressure = _currPressure;
 	pressureEdit->setCurrPressure(_currPressure);
 	frequencyEdit->setCurrPressure(_currPressure);
+
+	event(systemUIEvent::SHOW);
 }
