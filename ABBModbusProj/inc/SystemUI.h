@@ -61,7 +61,7 @@ private:
 	FrequencyEdit *frequencyEdit;
 	double currPressure;
 
-	// General variables:
+	// General status variables:
 	OperationMode mode;
 	bool powerOn;
 	ErrorStatus errorStatus;
