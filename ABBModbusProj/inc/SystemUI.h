@@ -15,6 +15,7 @@
 #include "FrequencyEdit.h"
 
 enum class OperationMode {AUTOMATIC, MANUAL};
+enum class ErrorStatus {NO_ERROR, TARGET_PRESSURE_UNREACHABLE_ERROR};
 
 class SystemUI {
 public:
@@ -40,6 +41,7 @@ public:
 	double getTargetPressure();
 	int getTargetFrequency();
 	void updateCurrPressure(double _currPressure);
+	ErrorStatus getErrorStatus() { return errorStatus; }
 
 private:
 	// LiquidCrystal data:
@@ -62,7 +64,7 @@ private:
 	// General variables:
 	OperationMode mode;
 	bool powerOn;
-	bool error;
+	ErrorStatus errorStatus;
 
 	void switchMode();
 	void displayPowerOff();

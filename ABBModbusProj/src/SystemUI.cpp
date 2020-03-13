@@ -85,14 +85,14 @@ void SystemUI::event(systemUIEvent e) {
 	switch (e) {
 		case (systemUIEvent::MODE_SW_PRESSED):
 
-			if (powerOn && !error) {
+			if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				switchMode();
 			}
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
 
-			if (powerOn && !error) {
+			if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				currMenu->event(MenuItem::menuEvent::up);
 				currMenu->event(MenuItem::menuEvent::ok);
 			}
@@ -100,7 +100,7 @@ void SystemUI::event(systemUIEvent e) {
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
 
-			if (powerOn && !error) {
+			if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				currMenu->event(MenuItem::menuEvent::down);
 				currMenu->event(MenuItem::menuEvent::ok);
 			}
@@ -119,19 +119,21 @@ void SystemUI::event(systemUIEvent e) {
 
 		case (systemUIEvent::POWER_SW_PRESSED):
 			if (!powerOn) {
+				// Turning power off negates all errors,
+				// Thus no error handling needed when turning power on...
 				powerOn = true;
 				currMenu->event(MenuItem::menuEvent::show);
 			}
 			else {
 				powerOn = false;
-				error = false;
+				errorStatus = ErrorStatus::NO_ERROR;
 				displayPowerOff();
 			}
 			break;
 
 		case (systemUIEvent::SHOW):
 
-			if (!error){
+			if (errorStatus == ErrorStatus::NO_ERROR){
 				if (powerOn) {
 					currMenu->event(MenuItem::menuEvent::show);
 				}
@@ -144,14 +146,14 @@ void SystemUI::event(systemUIEvent e) {
 		case (systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR):
 
 			if (powerOn) {
-				error = true;
+				errorStatus = ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR;
 				displayLatencyError();
 			}
 			break;
 
-		case (SystemUIEvent::ERROR_ACK):
+		case (systemUIEvent::ERROR_ACK):
 
-			error = false;
+			errorStatus = ErrorStatus::NO_ERROR;
 			if (powerOn) {
 				currMenu->event(MenuItem::menuEvent::show);
 			}
