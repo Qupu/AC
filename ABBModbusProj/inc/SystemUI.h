@@ -28,7 +28,8 @@ public:
 			MODE_SW_PRESSED,
 			SHOW,
 			POWER_SW_PRESSED,
-			TARGET_PRESSURE_LATENCY_ERROR
+			TARGET_PRESSURE_LATENCY_ERROR,
+			ERROR_ACK
 			// More Events?
 		};
 	SystemUI(bool _powerOn);

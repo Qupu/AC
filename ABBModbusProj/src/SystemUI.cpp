@@ -79,40 +79,28 @@ SystemUI::~SystemUI() {
 }
 
 void SystemUI::event(systemUIEvent e) {
-	#define withErrorAck(notErrorBody) if(!error) {       \
-										   notErrorBody   \
-									   }                  \
-									   else {             \
-									       error = false; \
-									   }
 
 	switch (e) {
 		case (systemUIEvent::MODE_SW_PRESSED):
 
-			if (powerOn) {
-				withErrorAck(
-						switchMode();
-				)
+			if (powerOn && !error) {
+				switchMode();
 			}
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
 
-			if (powerOn) {
-				withErrorAck(
-					currMenu->event(MenuItem::menuEvent::up);
-					currMenu->event(MenuItem::menuEvent::ok);
-				)
+			if (powerOn && !error) {
+				currMenu->event(MenuItem::menuEvent::up);
+				currMenu->event(MenuItem::menuEvent::ok);
 			}
 			break;
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
 
-			if (powerOn) {
-				withErrorAck(
-					currMenu->event(MenuItem::menuEvent::down);
-					currMenu->event(MenuItem::menuEvent::ok);
-				)
+			if (powerOn && !error) {
+				currMenu->event(MenuItem::menuEvent::down);
+				currMenu->event(MenuItem::menuEvent::ok);
 			}
 			break;
 
@@ -133,10 +121,9 @@ void SystemUI::event(systemUIEvent e) {
 				currMenu->event(MenuItem::menuEvent::show);
 			}
 			else {
-				withErrorAck(
-					powerOn = false;
-					displayPowerOff();
-				)
+				powerOn = false;
+				error = false;
+				displayPowerOff();
 			}
 			break;
 
@@ -157,6 +144,14 @@ void SystemUI::event(systemUIEvent e) {
 			if (powerOn) {
 				error = true;
 				displayLatencyError();
+			}
+			break;
+
+		case (SystemUIEvent::ERROR_ACK):
+
+			error = false;
+			if (powerOn) {
+				currMenu->event(MenuItem::menuEvent::show);
 			}
 			break;
 	}
