@@ -22,7 +22,7 @@ public:
 private:
 	static const int step = 1;
 	static const int lowLim  = 0;
-	static const int highLim = 125;
+	static const int highLim = 120;
 
 	double currPressure;
 };
