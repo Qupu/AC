@@ -15,7 +15,7 @@
 class FrequencyEdit : public IntegerEdit {
 public:
 	static const int maxFrequency = 20000;
-	static const int frequencyScale = 400;
+	static const int frequencyScale = 100;
 
 	FrequencyEdit(LiquidCrystal *lcd_);
 	virtual ~FrequencyEdit();

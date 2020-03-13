@@ -5,10 +5,6 @@
  *      Author: Veli-Pekka Vaikkola
  */
 
-
-#ifndef PININT_HANDLERS_CPP_
-#define PININT_HANDLERS_CPP_
-
 #include "EventBuffer.h"
 #include <atomic>
 #include "SystemUI.h"
@@ -56,16 +52,15 @@ void PIN_INT2_IRQHandler(void) {
 /* Handler for power button */
 void PIN_INT3_IRQHandler(void) {
 	Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH3);
-
+/*
 	if (ui_event_buffer && pininterrupt_sw_counter == 0) {
 		pininterrupt_sw_counter = pininterrupt_sw_interval;
 
 		if (!ui_event_buffer->full())
 			ui_event_buffer->push(SystemUI::systemUIEvent::POWER_SW_PRESSED);
 	}
+*/
 }
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* SWITCH_H_ */

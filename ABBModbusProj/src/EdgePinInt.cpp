@@ -8,7 +8,8 @@
 #include "EdgePinInt.h"
 #include "chip.h"
 
-EdgePinInt::EdgePinInt(int int_nr, int port, int pin, bool high) {
+EdgePinInt::EdgePinInt(int int_nr, int port, int pin, bool high) :
+DigitalIoPin{ port, pin, true, true, true } {
 	if (instances == 0) {
 		// Initialize pin interrupt hardware
 		Chip_PININT_Init(LPC_GPIO_PIN_INT);
@@ -19,13 +20,6 @@ EdgePinInt::EdgePinInt(int int_nr, int port, int pin, bool high) {
 	}
 
 	++instances;
-
-	// Configure pin as inverted input with pullup
-	Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
-			(IOCON_DIGMODE_EN | IOCON_INV_EN | IOCON_MODE_PULLUP | IOCON_MODE_INACT));
-
-	/* Configure GPIO pin as input */
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO, port, pin);
 
 	// Configure pin interrupt to generate interrupt when it sees a rising edge on pin
 	Chip_INMUX_PinIntSel(int_nr, port, pin);

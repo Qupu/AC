@@ -47,6 +47,18 @@
  ****************************************************************************/
 extern EventBuffer * ui_event_buffer;
 extern volatile std::atomic_int pininterrupt_sw_counter;
+static volatile int timeout_counter;
+static volatile int update_counter;
+static volatile int sleep_counter;
+static volatile uint32_t systicks;
+static EdgePinInt * sw_mode;
+static EdgePinInt * sw_down;
+static EdgePinInt * sw_up;
+static EdgePinInt * sw_power;
+
+static const int startup_freq = 2000;
+static const int update_interval = 4000;
+static const int timeout_limit = 31000;
 
 /*****************************************************************************
  * Private functions
@@ -56,8 +68,6 @@ extern volatile std::atomic_int pininterrupt_sw_counter;
 /*****************************************************************************
  * Public functions
  ****************************************************************************/
-static volatile int counter;
-static volatile uint32_t systicks;
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,10 +78,25 @@ extern "C" {
  */
 void SysTick_Handler(void)
 {
-	systicks++;
-	if(counter > 0) counter--;
+	if (sleep_counter > 0) --sleep_counter;
+	if (update_counter > 0) --update_counter;
+	if (timeout_counter <= timeout_limit) {
+		if (timeout_counter == timeout_limit && ui_event_buffer && !ui_event_buffer->full()) {
+				ui_event_buffer->push(SystemUI::systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR);
+		}
+
+		++timeout_counter;
+	}
+
+	++systicks;
+
+
 	if (pininterrupt_sw_counter > 0) {
-		--pininterrupt_sw_counter;
+		update_counter = 1000;
+		if (!(sw_mode->read() || sw_up->read() || sw_down->read() || sw_power->read())) {
+
+			--pininterrupt_sw_counter;
+		}
 	}
 }
 #ifdef __cplusplus
@@ -80,8 +105,8 @@ void SysTick_Handler(void)
 
 void Sleep(int ms)
 {
-	counter = ms;
-	while(counter > 0) {
+	sleep_counter = ms;
+	while(sleep_counter > 0) {
 		__WFI();
 	}
 }
@@ -211,7 +236,7 @@ bool setFrequency(ModbusMaster& node, uint16_t freq)
 
 	Frequency = freq; // set motor frequency
 
-	printf("Set freq = %d\n", freq/40); // for debugging
+	printf("Set freq = %d\n", freq); // for debugging
 
 	// wait until we reach set point or timeout occurs
 	ctr = 0;
@@ -233,85 +258,143 @@ bool setFrequency(ModbusMaster& node, uint16_t freq)
 
 void startter(ModbusMaster& node)
 {
-    node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
+	node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
 
-    ModbusRegister ControlWord(&node, 0);
-    ModbusRegister StatusWord(&node, 3);
-    ModbusRegister OutputFrequency(&node, 102);
-    ModbusRegister Current(&node, 103);
+	ModbusRegister ControlWord(&node, 0);
+	ModbusRegister ref1(&node, 1);
+	ModbusRegister ref2(&node, 2);
+	ModbusRegister StatusWord(&node, 3);
+	ModbusRegister OutputFrequency(&node, 102);
+	ModbusRegister Current(&node, 103);
 
-    int state = 0;
+	int state = 0;
 
-    while(state != 7) {
-        switch(state)
-        {
-            case(0): // Start:
-					 Current = 0x0000;
-            		 Sleep(5);
-		             OutputFrequency = 0x0000;
-		             Sleep(5);
-		             ControlWord = 0x0000;
-		             Sleep(5);
+	while(state != 7) {
+		switch(state) {
+		case(0): // Start:
+			ref1=0;
+			ref2=1;
+			Current = 0x0000;
+			Sleep(5);
+			OutputFrequency = 0x0000;
+			Sleep(5);
+			ControlWord = 0x0000;
+			Sleep(5);
 
-		             if (StatusWord & 0x0001) state = 2;
-		             else state = 1;
-		        break;
+		case(1): //not ready to switch on
+			Sleep(110);
+			ControlWord = 0x0006;
+			Sleep(5);
+			state = 2;
 
-            case(1): //not ready to switch on
-                    Sleep(110);
-                    ControlWord = 0x0006;
-                    Sleep(5);
-                    state = 2;
+		case(2): //ready to switch on
+			if (!(StatusWord & 0x0001)) {
+				state = 0;
+				break;
+			}
 
-            case(2): //ready to switch on
-                    if (!(StatusWord & 0x0001)) {
-                    	state = 0;
-                    	Sleep(5);
-                    	break;
-                    }
+			Sleep(5);
+			ControlWord = 0x0007;
+			Sleep(5);
 
-                    Sleep(5);
-                    ControlWord = 0x0007;
-                    Sleep(5);
+		case(3): //ready to operte
+			if (!(StatusWord & 0x0002)) {
+				state = 0;
+				break;
+			}
 
-            case(3): //ready to operte
-                    if (!(StatusWord & 0x0802)) {
-                    	state = 0;
-                    	Sleep(5);
-                    	break;
-                    }
+			Sleep(5);
+			if (!(StatusWord & 0x1000)) {
+				state = 0;
+				break;
+			}
+			Sleep(5);
 
-                    Sleep(5);
+			ControlWord = 0x000F;
+			Sleep(5);
 
-                    ControlWord = 0x000F;
-                    Sleep(5);
+		// jatkuu
+		case(4): //operation enabled
+			if (!(StatusWord & 0x0004)) {
+				state = 0;
+				break;
+			}
 
-            case(4): //operation enabled
-                    if (!(StatusWord & 0x0004)) {
-                    	state = 0;
-                    	Sleep(5);
-                    	break;
-                    }
+			Sleep(5);
+			ControlWord = 0x002F;
+			Sleep(5);
 
-                    Sleep(5);
-                    ControlWord = 0x002F;
-                    Sleep(5);
+		case(5): //RFG: ACCELERATORENABLED
+			ControlWord = 0x006F;
+			Sleep(5);
 
-            case(5): //RFG: ACCELERATORENABLED
-                    ControlWord = 0x006F;
-                    Sleep(5);
+		case(6): //operating
+			if(!(StatusWord & 0x0100)) {
+				state = 0;
+				break;
+			}
 
-            case(6): //operating
-                    if(!(StatusWord & 0x0080)) {
-                    	state = 0;
-                    	Sleep(5);
-                    	break;
-                    }
+			state = 7;
+			Sleep(5);
+		}
+	}
 
-                    state = 7;
-                    Sleep(5);
-        }
-    }
+
+
+/*
+	int state = 0;
+
+	while(state != 6) {
+
+		Current = 0x0000;
+		OutputFrequency = 0x0000;
+		ControlWord = 0x0000;
+		Sleep(5);
+
+		switch(state)
+		{
+		case(0): //not ready to switch on
+				if (StatusWord & 0x0001) break;
+
+		Sleep(110);
+		ControlWord = 0x0006;
+		Sleep(5);
+
+		case(1): //ready to switch on
+		if (!(StatusWord & 0x0001)) break;
+
+		Sleep(5);
+		ControlWord = 0x0007;
+		Sleep(5);
+
+		case(2): //ready to operte
+		if (!(StatusWord & 0x0002)) break;
+
+		Sleep(5);
+		if (!(StatusWord & 0x0800)) break;
+
+		Sleep(5);
+		ControlWord = 0x000F;
+		Sleep(5);
+
+		case(3): //operation enabled
+		if (!(StatusWord & 0x0004)) break;
+
+		Sleep(5);
+		ControlWord = 0x002F;
+		Sleep(5);
+
+		case(4): //RFG: ACCELERATORENABLED
+		ControlWord = 0x006F;
+		Sleep(5);
+
+		case(5): //operating
+		if(!(StatusWord & 0x0080)) break;
+
+		state = 6;
+		Sleep(5);
+		}
+	}*/
 }
 
 void abbModbusTest()
@@ -407,6 +490,7 @@ void modbusTest()
 // OperationMode::AUTOMATIC   - the fan system is in automatic mode
 // OperationMode::MANUAL      - the fan system is in manual mode
 
+
 /**
  * @brief	Main UART program body
  * @return	Always returns 1
@@ -437,16 +521,52 @@ int main(void)
 	/* Enable and setup SysTick Timer at a periodic rate */
 	SysTick_Config(SystemCoreClock / 1000);
 
+	pininterrupt_sw_counter = 0;
 	EdgePinInt swe1(0, 0,24,true); 	//d8
 	EdgePinInt swe2(1, 0,9,true); 	//d3
 	EdgePinInt swe3(2, 0,10,true); 	//d4
-	EdgePinInt swe4(3, 3,1,true); 	//d6
+	EdgePinInt swe4(3, 1,3,true); 	//d6
+
+	sw_mode = &swe1;
+	sw_down = &swe2;
+	sw_up = &swe3;
+	sw_power = &swe4;
+
 	ui_event_buffer = new EventBuffer(4);
 
 	SDPSensor sdp(0x40);
 	ModbusMaster node(2); // Create modbus object that connects to slave id 2
+	ModbusRegister StatusWord(&node, 3);
 
+#if false
 	startter(node);
+#else
+	node.begin(9600); // set transmission rate - other parameters are set inside the object and can't be changed here
+
+	ModbusRegister ControlWord(&node, 0);
+	ModbusRegister OutputFrequency(&node, 102);
+	ModbusRegister Current(&node, 103);
+
+
+	// need to use explicit conversion since printf's variable argument doesn't automatically convert this to an integer
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	ControlWord = 0x0406; // prepare for starting
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	Sleep(1000); // give converter some time to set up
+	// note: we should have a startup state machine that check converter status and acts per current status
+	//       but we take the easy way out and just wait a while and hope that everything goes well
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	ControlWord = 0x047F; // set drive to start mode
+
+	printf("Status=%04X\n", (int)StatusWord); // for debugging
+
+	Sleep(1000); // give converter some time to set up
+#endif
 
 	Board_LED_Set(0, false);
 	Board_LED_Set(1, true);
@@ -456,43 +576,77 @@ int main(void)
 	double press = 0;
 
 	SystemUI UI(true);
+	UI.updateCurrPressure(press);
 	UI.event(SystemUI::systemUIEvent::SHOW);
 	OperationMode mode = UI.getOperationMode();
-	UI.updateCurrPressure(press);
 
+	update_counter = 0;
+	timeout_counter = 0;
 	while (1)
 	{
 		//go through the buffer
 		while (!ui_event_buffer->empty()) {
 			SystemUI::systemUIEvent event = ui_event_buffer->shift();
 			UI.event(event);
-			if (event == SystemUI::systemUIEvent::MODE_SW_PRESSED)
-				mode = UI.getOperationMode();
-		}
 
-		sdp.ReadPressure(press);
-		UI.updateCurrPressure(press);
-
-		prev_freq = freq;
-
-		if (mode == OperationMode::AUTOMATIC)	{
-			if(press < UI.getTargetPressure() - 1)
-				if (freq <= FrequencyEdit::maxFrequency - FrequencyEdit::frequencyScale)
-					freq += FrequencyEdit::frequencyScale;
-				else
-					freq = FrequencyEdit::maxFrequency;
-
-			else if (press > UI.getTargetPressure() + 1) {
-				if (freq >= FrequencyEdit::frequencyScale) freq -= FrequencyEdit::frequencyScale;
-				else freq = 0;
+			if (event != SystemUI::systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR) {
+				timeout_counter = 0;
 			}
-		} else if (mode == OperationMode::MANUAL) {
-			freq = UI.getTargetFrequency();
+
+			if (event == SystemUI::systemUIEvent::MODE_SW_PRESSED) {
+				mode = UI.getOperationMode();
+
+				update_counter = 0;
+			}
 		}
+
+		if (update_counter == 0) {
+			update_counter = update_interval;
+
+			sdp.ReadPressure(press);
+			UI.updateCurrPressure(press);
+
+			(int)StatusWord;	// Heartbeat
+
+			printf("Pressure: %f\n", press);
+			printf("Timeout:  %d\n", timeout_counter);
+
+			if (mode == OperationMode::AUTOMATIC)	{
+				double target = UI.getTargetPressure();
+				int diff = 0.5 + press < target ? target - press : press - target;
+
+				if (target == 0) {
+					freq = 0;
+				}
+
+				if (press < target - 1) {
+					freq += diff * FrequencyEdit::frequencyScale;
+					if (prev_freq == 0) freq += startup_freq;
+				} else if (press > target + 1) {
+					freq -= diff * FrequencyEdit::frequencyScale;
+				} else {
+					if (timeout_counter >= timeout_limit) {
+						UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);	// Clear error if we reach target pressure
+					}
+					timeout_counter = 0;
+				}
+
+			} else if (mode == OperationMode::MANUAL) {
+				freq = UI.getTargetFrequency();
+				timeout_counter = 0;
+			}
+
+			UI.event(SystemUI::systemUIEvent::SHOW);
+		}
+
+		if (freq < 0) freq = 0;
+		else if (freq > FrequencyEdit::maxFrequency) freq = FrequencyEdit::maxFrequency;
 
 		if (freq != prev_freq) {
 			setFrequency(node, freq);
+			prev_freq = freq;
 		}
+
 	}
 
 	return 1;
