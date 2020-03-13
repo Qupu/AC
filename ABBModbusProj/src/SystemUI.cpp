@@ -34,7 +34,9 @@ void SystemUI::displayPowerOff() {
 void SystemUI::displayLatencyError() {
 	lcd->clear();
 	lcd->setCursor(0,0);
-	lcd->print("TARGET PRESSURE NOT REACHABLE");
+	lcd->print("TARGET PRESSURE");
+	lcd->setCursor(0,2);
+	lcd->print("NOT REACHABLE");
 
 	lcd->setCursor(lcdWidth-1, 0);
 	lcd->print("E");
