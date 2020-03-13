@@ -85,14 +85,20 @@ void SystemUI::event(systemUIEvent e) {
 	switch (e) {
 		case (systemUIEvent::MODE_SW_PRESSED):
 
-			if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
+			if (errorMode == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
+				event(systemUIEvent::ERROR_ACK)
+			}
+			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				switchMode();
 			}
 			break;
 
 		case (systemUIEvent::UP_SW_PRESSED):
 
-			if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
+			if (errorMode == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
+						event(systemUIEvent::ERROR_ACK)
+					}
+			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				currMenu->event(MenuItem::menuEvent::up);
 				currMenu->event(MenuItem::menuEvent::ok);
 			}
@@ -100,7 +106,10 @@ void SystemUI::event(systemUIEvent e) {
 
 		case (systemUIEvent::DOWN_SW_PRESSED):
 
-			if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
+			if (errorMode == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
+						event(systemUIEvent::ERROR_ACK)
+					}
+			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				currMenu->event(MenuItem::menuEvent::down);
 				currMenu->event(MenuItem::menuEvent::ok);
 			}
@@ -125,9 +134,14 @@ void SystemUI::event(systemUIEvent e) {
 				currMenu->event(MenuItem::menuEvent::show);
 			}
 			else {
-				powerOn = false;
-				errorStatus = ErrorStatus::NO_ERROR;
-				displayPowerOff();
+				if (errorMode == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
+					event(systemUIEvent::ERROR_ACK)
+				}
+				else {
+					powerOn = false;
+					errorStatus = ErrorStatus::NO_ERROR;
+					displayPowerOff();
+				}
 			}
 			break;
 
