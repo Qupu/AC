@@ -23,11 +23,8 @@ public:
 	MenuItem(PropertyEdit *property);
 	virtual ~MenuItem();
 	virtual bool event(menuEvent e);
-	bool hasChanged();
-	void clearChange();
 private:
 	PropertyEdit *pe;
-	bool updated;
 };
 
 #endif /* MENUITEM_H_ */

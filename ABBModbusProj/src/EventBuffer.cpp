@@ -11,19 +11,19 @@
 
 EventBuffer::EventBuffer(uint32_t capacity_) : read(0), write(0) {
 	capacity = (capacity_ >= 32) ? 31 : capacity_;
-	buffer = new SystemUI::systemUIEvent[(1UL << capacity)];
+	buffer = new SystemManager::SystemEvent[(1UL << capacity)];
 }
 
 EventBuffer::~EventBuffer() {
 	delete[] buffer;
 }
 
-void EventBuffer::push(SystemUI::systemUIEvent e) {
+void EventBuffer::push(SystemManager::SystemEvent e) {
 	assert(!full());
 	buffer[mask(write++)] = e;
 }
 
-SystemUI::systemUIEvent EventBuffer::shift() {
+SystemManager::SystemEvent EventBuffer::shift() {
 	assert(!empty());
 	return buffer[mask(read++)];
 }

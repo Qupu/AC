@@ -8,15 +8,15 @@
 #ifndef EVENTBUFFER_H_
 #define EVENTBUFFER_H_
 
-#include "SystemUI.h"
+#include <SystemManager.h>
 #include "board.h"
 
 class EventBuffer {
 public:
 	EventBuffer(uint32_t capacity_ = 5);
 	virtual ~EventBuffer();
-	void push(SystemUI::systemUIEvent e);
-	SystemUI::systemUIEvent shift();
+	void push(SystemManager::SystemEvent e);
+	SystemManager::SystemEvent shift();
 	uint32_t size();
 	bool full();
 	bool empty();
@@ -24,7 +24,7 @@ public:
 private:
 	uint32_t capacity;
 
-	volatile SystemUI::systemUIEvent * buffer;
+	volatile SystemManager::SystemEvent * buffer;
 	uint32_t read;
 	volatile uint32_t write;
 

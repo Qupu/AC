@@ -5,9 +5,9 @@
  *      Author: Veli-Pekka Vaikkola
  */
 
+#include <SystemManager.h>
 #include "EventBuffer.h"
 #include <atomic>
-#include "SystemUI.h"
 
 static const int pininterrupt_sw_interval = 20;
 EventBuffer *ui_event_buffer;
@@ -24,7 +24,7 @@ void PIN_INT0_IRQHandler(void) {
 		pininterrupt_sw_counter = pininterrupt_sw_interval;
 
 		if (!ui_event_buffer->full())
-			ui_event_buffer->push(SystemUI::systemUIEvent::MODE_SW_PRESSED);
+			ui_event_buffer->push(SystemManager::SystemEvent::MODE_SW_PRESSED);
 	}
 }
 /* Handler for up button */
@@ -35,7 +35,7 @@ void PIN_INT1_IRQHandler(void) {
 		pininterrupt_sw_counter = pininterrupt_sw_interval;
 
 		if (!ui_event_buffer->full())
-			ui_event_buffer->push(SystemUI::systemUIEvent::DOWN_SW_PRESSED);
+			ui_event_buffer->push(SystemManager::SystemEvent::DOWN_SW_PRESSED);
 	}
 }
 /* Handler for down button */
@@ -46,7 +46,7 @@ void PIN_INT2_IRQHandler(void) {
 		pininterrupt_sw_counter = pininterrupt_sw_interval;
 
 		if (!ui_event_buffer->full())
-			ui_event_buffer->push(SystemUI::systemUIEvent::UP_SW_PRESSED);
+			ui_event_buffer->push(SystemManager::SystemEvent::UP_SW_PRESSED);
 	}
 }
 /* Handler for power button */
@@ -57,7 +57,7 @@ void PIN_INT3_IRQHandler(void) {
 		pininterrupt_sw_counter = pininterrupt_sw_interval;
 
 		if (!ui_event_buffer->full())
-			ui_event_buffer->push(SystemUI::systemUIEvent::POWER_SW_PRESSED);
+			ui_event_buffer->push(SystemManager::SystemEvent::POWER_SW_PRESSED);
 	}
 */
 }

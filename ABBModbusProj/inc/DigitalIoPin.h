@@ -12,7 +12,7 @@ public:
 protected:
 	volatile int port;
 	volatile int pin;
-	volatile int input;
+	volatile bool input;
 	volatile bool invert;
 };
 

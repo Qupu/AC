@@ -5,8 +5,8 @@
  *      Author: rqqht
  */
 
-#ifndef SYSTEMUI_H_
-#define SYSTEMUI_H_
+#ifndef SYSTEMMANAGER_H_
+#define SYSTEMMANAGER_H_
 
 #include "SimpleMenu.h"
 #include "MenuItem.h"
@@ -17,12 +17,12 @@
 enum class OperationMode {AUTOMATIC, MANUAL};
 enum class ErrorStatus {NO_ERROR, TARGET_PRESSURE_UNREACHABLE_ERROR};
 
-class SystemUI {
+class SystemManager {
 public:
 	static const int lcdWidth = 16;
 	static const int lcdHeight = 2;
 
-	enum class systemUIEvent {
+	enum class SystemEvent {
 			UP_SW_PRESSED,
 			DOWN_SW_PRESSED,
 			SELECT_SW_PRESSED,
@@ -33,9 +33,9 @@ public:
 			ERROR_ACK
 			// More Events?
 		};
-	SystemUI(bool _powerOn);
-	virtual ~SystemUI();
-	void event(systemUIEvent e);
+	SystemManager(bool _powerOn);
+	virtual ~SystemManager();
+	void event(SystemEvent e);
 	OperationMode getOperationMode();
 	void setOperationMode(OperationMode _mode);
 	double getTargetPressure();
@@ -71,4 +71,4 @@ private:
 	void displayLatencyError();
 };
 
-#endif /* SYSTEMUI_H_ */
+#endif /* SYSTEMMANAGER_H_ */

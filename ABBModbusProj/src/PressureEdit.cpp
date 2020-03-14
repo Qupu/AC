@@ -6,8 +6,8 @@
  */
 
 #include <PressureEdit.h>
+#include <SystemManager.h>
 #include "IntegerEdit.h"
-#include "SystemUI.h"
 
 PressureEdit::PressureEdit(LiquidCrystal *lcd_) : IntegerEdit(lcd_, "PRESSURE", step, lowLim, highLim) { }
 
@@ -18,7 +18,7 @@ void PressureEdit::display() {
 
 	lcd->setCursor(0,0);
 	lcd->print(title);
-	lcd->setCursor(SystemUI::lcdWidth-1, 0);
+	lcd->setCursor(SystemManager::lcdWidth-1, 0);
 	lcd->print("A");
 
 	lcd->setCursor(0,1);
@@ -27,7 +27,7 @@ void PressureEdit::display() {
 	lcd->print(s);
 
 	snprintf(s, 10, "%3d Pa", (int)(currPressure+0.5));
-	lcd->setCursor(SystemUI::lcdWidth-6, 1);
+	lcd->setCursor(SystemManager::lcdWidth-6, 1);
 	lcd->print(s);
 }
 

@@ -5,12 +5,12 @@
  *      Author: rqqht
  */
 
-#include "SystemUI.h"
+#include <SystemManager.h>
 #include "DigitalIoPin.h"
 #include "MenuItem.h"
 
 // Private Methods:
-void SystemUI::switchMode() {
+void SystemManager::switchMode() {
 	currMenu->reset();
 
 	if (mode == OperationMode::AUTOMATIC){
@@ -25,13 +25,13 @@ void SystemUI::switchMode() {
 	currMenu->event(MenuItem::menuEvent::show);
 }
 
-void SystemUI::displayPowerOff() {
+void SystemManager::displayPowerOff() {
 	lcd->clear();
 	lcd->setCursor(0,0);
 	lcd->print("POWER OFF...");
 }
 
-void SystemUI::displayLatencyError() {
+void SystemManager::displayLatencyError() {
 	lcd->clear();
 	lcd->setCursor(0,0);
 	lcd->print("TARGET PRESSURE");
@@ -46,7 +46,7 @@ void SystemUI::displayLatencyError() {
 // ---------------------
 // The public interface:
 
-SystemUI::SystemUI(bool _powerOn) :
+SystemManager::SystemManager(bool _powerOn) :
 		RS(0, 8, false, false, false),
 		EN(1, 6, false, false, false),
 		D0(1, 8, false, false, false),
@@ -74,29 +74,29 @@ SystemUI::SystemUI(bool _powerOn) :
 	currMenu = &manualModeMenu;
 }
 
-SystemUI::~SystemUI() {
+SystemManager::~SystemManager() {
 	delete frequencyEdit;
 	delete pressureEdit;
 	delete lcd;
 }
 
-void SystemUI::event(systemUIEvent e) {
+void SystemManager::event(SystemEvent e) {
 
 	switch (e) {
-		case (systemUIEvent::MODE_SW_PRESSED):
+		case (SystemEvent::MODE_SW_PRESSED):
 
 			if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
-				event(systemUIEvent::ERROR_ACK);
+				event(SystemEvent::ERROR_ACK);
 			}
 			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				switchMode();
 			}
 			break;
 
-		case (systemUIEvent::UP_SW_PRESSED):
+		case (SystemEvent::UP_SW_PRESSED):
 
 			if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
-						event(systemUIEvent::ERROR_ACK);
+						event(SystemEvent::ERROR_ACK);
 					}
 			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				currMenu->event(MenuItem::menuEvent::up);
@@ -104,10 +104,10 @@ void SystemUI::event(systemUIEvent e) {
 			}
 			break;
 
-		case (systemUIEvent::DOWN_SW_PRESSED):
+		case (SystemEvent::DOWN_SW_PRESSED):
 
 			if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
-						event(systemUIEvent::ERROR_ACK);
+						event(SystemEvent::ERROR_ACK);
 					}
 			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
 				currMenu->event(MenuItem::menuEvent::down);
@@ -115,7 +115,7 @@ void SystemUI::event(systemUIEvent e) {
 			}
 			break;
 
-		case (systemUIEvent::SELECT_SW_PRESSED):
+		case (SystemEvent::SELECT_SW_PRESSED):
 			// No functionality implemented
 			//
 			// Could be used if there were more menu items for each mode's menu.
@@ -126,7 +126,7 @@ void SystemUI::event(systemUIEvent e) {
 			//   * "Timed frequency boost" menu item for manual mode
 			break;
 
-		case (systemUIEvent::POWER_SW_PRESSED):
+		case (SystemEvent::POWER_SW_PRESSED):
 			if (!powerOn) {
 				// Turning power off negates all errors,
 				// Thus no error handling needed when turning power on...
@@ -135,7 +135,7 @@ void SystemUI::event(systemUIEvent e) {
 			}
 			else {
 				if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
-					event(systemUIEvent::ERROR_ACK);
+					event(SystemEvent::ERROR_ACK);
 				}
 				else {
 					powerOn = false;
@@ -145,7 +145,7 @@ void SystemUI::event(systemUIEvent e) {
 			}
 			break;
 
-		case (systemUIEvent::SHOW):
+		case (SystemEvent::SHOW):
 
 			if (errorStatus == ErrorStatus::NO_ERROR){
 				if (powerOn) {
@@ -157,7 +157,7 @@ void SystemUI::event(systemUIEvent e) {
 			}
 			break;
 
-		case (systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR):
+		case (SystemEvent::TARGET_PRESSURE_LATENCY_ERROR):
 
 			if (powerOn) {
 				errorStatus = ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR;
@@ -165,7 +165,7 @@ void SystemUI::event(systemUIEvent e) {
 			}
 			break;
 
-		case (systemUIEvent::ERROR_ACK):
+		case (SystemEvent::ERROR_ACK):
 
 			errorStatus = ErrorStatus::NO_ERROR;
 			if (powerOn) {
@@ -175,11 +175,11 @@ void SystemUI::event(systemUIEvent e) {
 	}
 }
 
-OperationMode SystemUI::getOperationMode() {
+OperationMode SystemManager::getOperationMode() {
 	return mode;
 }
 
-void SystemUI::setOperationMode(OperationMode _mode) {
+void SystemManager::setOperationMode(OperationMode _mode) {
 	mode = _mode;
 	if (mode == OperationMode::AUTOMATIC)
 		currMenu = &autoModeMenu;
@@ -187,18 +187,18 @@ void SystemUI::setOperationMode(OperationMode _mode) {
 		currMenu = &manualModeMenu;
 }
 
-double SystemUI::getTargetPressure() {
+double SystemManager::getTargetPressure() {
 	return pressureEdit->getValue();
 }
 
-int SystemUI::getTargetFrequency() {
+int SystemManager::getTargetFrequency() {
 	return frequencyEdit->getValue();
 }
 
-void SystemUI::updateCurrPressure(double _currPressure) {
+void SystemManager::updateCurrPressure(double _currPressure) {
 	currPressure = _currPressure;
 	pressureEdit->setCurrPressure(_currPressure);
 	frequencyEdit->setCurrPressure(_currPressure);
 
-	event(systemUIEvent::SHOW);
+	event(SystemEvent::SHOW);
 }

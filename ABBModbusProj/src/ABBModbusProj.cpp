@@ -24,7 +24,7 @@
 #include "LpcUart.h"
 #include "DigitalIoPin.h"
 #include "SDPSensor.h"
-#include "SystemUI.h"
+#include <SystemManager.h>
 #include "EdgePinInt.h"
 #include "EventBuffer.h"
 
@@ -72,7 +72,7 @@ void SysTick_Handler(void)
 	if (update_counter > 0) --update_counter;
 	if (timeout_counter <= timeout_limit) {
 		if (timeout_counter == timeout_limit && ui_event_buffer && !ui_event_buffer->full()) {
-				ui_event_buffer->push(SystemUI::systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR);
+				ui_event_buffer->push(SystemManager::SystemEvent::TARGET_PRESSURE_LATENCY_ERROR);
 		}
 
 		++timeout_counter;
@@ -193,9 +193,9 @@ int main(void)
 	int prev_freq = 0;
 	double press = 0;
 
-	SystemUI UI(true);
+	SystemManager UI(true);
 	UI.updateCurrPressure(press);
-	UI.event(SystemUI::systemUIEvent::SHOW);
+	UI.event(SystemManager::SystemEvent::SHOW);
 	OperationMode mode = UI.getOperationMode();
 
 	update_counter = 0;
@@ -204,14 +204,14 @@ int main(void)
 	{
 		//go through the buffer
 		while (!ui_event_buffer->empty()) {
-			SystemUI::systemUIEvent event = ui_event_buffer->shift();
+			SystemManager::SystemEvent event = ui_event_buffer->shift();
 			UI.event(event);
 
-			if (event != SystemUI::systemUIEvent::TARGET_PRESSURE_LATENCY_ERROR) {
+			if (event != SystemManager::SystemEvent::TARGET_PRESSURE_LATENCY_ERROR) {
 				timeout_counter = 0;
 			}
 
-			if (event == SystemUI::systemUIEvent::MODE_SW_PRESSED) {
+			if (event == SystemManager::SystemEvent::MODE_SW_PRESSED) {
 				mode = UI.getOperationMode();
 
 				update_counter = 0;
@@ -244,7 +244,7 @@ int main(void)
 					freq -= diff * FrequencyEdit::frequencyScale;
 				} else {
 					if (timeout_counter >= timeout_limit) {
-						UI.event(SystemUI::systemUIEvent::DOWN_SW_PRESSED);	// Clear error if we reach target pressure
+						UI.event(SystemManager::SystemEvent::DOWN_SW_PRESSED);	// Clear error if we reach target pressure
 					}
 					timeout_counter = 0;
 				}
@@ -254,7 +254,7 @@ int main(void)
 				timeout_counter = 0;
 			}
 
-			UI.event(SystemUI::systemUIEvent::SHOW);
+			UI.event(SystemManager::SystemEvent::SHOW);
 		}
 
 		if (freq < 0) freq = 0;

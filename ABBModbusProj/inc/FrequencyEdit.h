@@ -26,11 +26,11 @@ public:
 	void setCurrPressure(double _currPressure) { currPressure = _currPressure; }
 
 private:
-	const int barWidth = 50;
 	BarGraph *graph;
 
 	double currPressure;
 
+	static const int barWidth = 50;
 	static constexpr float step = 1;
 	static constexpr float lowLim  = 0;
 	static constexpr float highLim = 50;

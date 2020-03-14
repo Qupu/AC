@@ -7,7 +7,7 @@
 
 #include "MenuItem.h"
 
-MenuItem::MenuItem(PropertyEdit *property): pe(property), updated(false) {
+MenuItem::MenuItem(PropertyEdit *property): pe(property) {
 
 }
 
@@ -17,12 +17,10 @@ MenuItem::~MenuItem() {
 
 bool MenuItem::event(menuEvent e) {
 	bool handled = true;
-	clearChange();
 	switch(e) {
 	case ok:
 		if(pe->getFocus()) {
 			if (pe->accept())
-				updated = true;
 			pe->setFocus(false);
 
 		}
@@ -58,12 +56,4 @@ bool MenuItem::event(menuEvent e) {
 	if(handled) pe->display();
 
 	return handled;
-}
-
-bool MenuItem::hasChanged() {
-	return updated;
-}
-
-void MenuItem::clearChange() {
-	updated = false;
 }

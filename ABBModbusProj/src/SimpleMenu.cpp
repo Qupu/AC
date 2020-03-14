@@ -33,19 +33,8 @@ void SimpleMenu::event(MenuItem::menuEvent e) {
 	}
 }
 
-bool SimpleMenu::hasChanged() {
-	for (MenuItem* i : items)
-		if (i->hasChanged())
-			return true;
-
-	return false;
-}
-
-void SimpleMenu::clearChange() {
-	for (MenuItem* i : items)
-		i->clearChange();
-}
-
-
 void SimpleMenu::reset() {
+	// Is not currently used for anything.
+	// Could be used if any resetting was needed for
+	// the SystemUI menus when changing the operation mode.
 }
