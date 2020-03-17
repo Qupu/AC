@@ -10,7 +10,15 @@
 #include "MenuItem.h"
 
 // Private Methods:
+
+// SwitchMode switches the operation mode between
+// MANUAL and AUTOMATIC and makes all the required
+// adjustments to the menus
 void SystemManager::switchMode() {
+	// Although the SimpleMenu reset method is not currently used for anything,
+	// it could be used to perform any clean-up initializations when switching
+	// from one mode's menu to another mode's menu in a complete commercial system
+	// with more complex menu hierarchy.
 	currMenu->reset();
 
 	if (mode == OperationMode::AUTOMATIC){
@@ -35,12 +43,8 @@ void SystemManager::displayLatencyError() {
 	lcd->clear();
 	lcd->setCursor(0,0);
 	lcd->print("TARGET PRESSURE");
-	lcd->setCursor(0,2);
-	lcd->print("NOT REACHABLE");
-
-	lcd->setCursor(lcdWidth-1, 0);
-	lcd->print("E");
 	lcd->setCursor(0,1);
+	lcd->print("NOT REACHABLE");
 }
 
 // ---------------------
@@ -81,9 +85,14 @@ SystemManager::~SystemManager() {
 }
 
 void SystemManager::event(SystemEvent e) {
+	// The following holds for all button press events:
+	// if the system is in an error state and an event
+	// is fired, the error status is checked/cancelled
+	// (by using the SystemEvent::ERROR_ACK-event)
 
 	switch (e) {
 		case (SystemEvent::MODE_SW_PRESSED):
+			// The MODE_SW_PRESSED event is used to change the System's operation mode
 
 			if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
 				event(SystemEvent::ERROR_ACK);
@@ -94,17 +103,25 @@ void SystemManager::event(SystemEvent e) {
 			break;
 
 		case (SystemEvent::UP_SW_PRESSED):
+			// The UP_SW_PRESSED increases the value for the current mode's active menu item.
+			// Since, each mode only has one menu item at the moment, it increases either
+			// the target pressure (in AUTOMATIC mode) or the target speed/frequency (in MANUAL mode)
 
 			if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
 						event(SystemEvent::ERROR_ACK);
 					}
 			else if (powerOn && errorStatus == ErrorStatus::NO_ERROR) {
+				// Using the original SimpleMenu, every edit-event requires
+				// also an ok event:
 				currMenu->event(MenuItem::menuEvent::up);
 				currMenu->event(MenuItem::menuEvent::ok);
 			}
 			break;
 
 		case (SystemEvent::DOWN_SW_PRESSED):
+			// The UP_SW_PRESSED decreases the value for the current mode's active menu item.
+			// Since, each mode only has one menu item at the moment, it decreases either
+			// the target pressure (in AUTOMATIC mode) or the target speed/frequency (in MANUAL mode)
 
 			if (errorStatus == ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR) {
 						event(SystemEvent::ERROR_ACK);
@@ -127,6 +144,8 @@ void SystemManager::event(SystemEvent e) {
 			break;
 
 		case (SystemEvent::POWER_SW_PRESSED):
+			// the POWER_SW_PRESSED event is used to switch the power on/off.
+
 			if (!powerOn) {
 				// Turning power off negates all errors,
 				// Thus no error handling needed when turning power on...
@@ -146,6 +165,8 @@ void SystemManager::event(SystemEvent e) {
 			break;
 
 		case (SystemEvent::SHOW):
+			// The SHOW event is used to show the current menu item if the
+			// system is neither in error mode nor turned off.
 
 			if (errorStatus == ErrorStatus::NO_ERROR){
 				if (powerOn) {
@@ -158,6 +179,8 @@ void SystemManager::event(SystemEvent e) {
 			break;
 
 		case (SystemEvent::TARGET_PRESSURE_LATENCY_ERROR):
+			// The TARGET_PRESSURE_LATENCY_ERROR event is used to signal that the system
+			// wasn't able to reach the target pressure in a reasonable time interval.
 
 			if (powerOn) {
 				errorStatus = ErrorStatus::TARGET_PRESSURE_UNREACHABLE_ERROR;
@@ -166,6 +189,9 @@ void SystemManager::event(SystemEvent e) {
 			break;
 
 		case (SystemEvent::ERROR_ACK):
+			// The ERROR_ACK event is used to cancel/acknowledge a system error
+			// So far there exists only one possible error type:
+			// TARGET_PRESSURE_UNREACHABLE_ERROR...
 
 			errorStatus = ErrorStatus::NO_ERROR;
 			if (powerOn) {

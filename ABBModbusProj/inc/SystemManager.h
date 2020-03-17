@@ -25,13 +25,12 @@ public:
 	enum class SystemEvent {
 			UP_SW_PRESSED,
 			DOWN_SW_PRESSED,
-			SELECT_SW_PRESSED,
+			SELECT_SW_PRESSED,	// currently unused
 			MODE_SW_PRESSED,
 			SHOW,
 			POWER_SW_PRESSED,
 			TARGET_PRESSURE_LATENCY_ERROR,
 			ERROR_ACK
-			// More Events?
 		};
 	SystemManager(bool _powerOn);
 	virtual ~SystemManager();
